@@ -43,3 +43,31 @@ footer {
 
 footer .text-muted { font-size: 0.85rem; }
 footer .text-primary { text-transform: uppercase; font-size: 0.9rem; }
+/* Sidebar e Navegação */
+.nav-link {
+    transition: background-color 0.2s, color 0.2s;
+    border-radius: 8px;
+    margin-bottom: 5px;
+}
+
+.nav-link:hover {
+    background-color: #e3f2fd; /* Azul muito claro */
+    color: #0d6efd !important;
+}
+
+.nav-link.active {
+    background-color: #0d6efd;
+    color: white !important;
+}
+
+/* Opcional: esconder a barra em telemóveis */
+@media (max-width: 768px) {
+    .sidebar { display: none; }
+}
+.fundo-dashboard {
+    background-image: url('../img/fundo-hospitalar.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+}
