@@ -47,6 +47,37 @@
                 <div class="col-md-3"><label class="form-label">Nº de Série</label><input type="text" class="form-control" name="num_serie"></div>
                 <div class="col-md-3"><label class="form-label">Fabricante</label><input type="text" class="form-control" name="fabricante"></div>
             </div>
+            <h5 class="text-secondary border-bottom pb-2 mb-3">Aquisição e Estado</h5>
+            <div class="row g-3 mb-4">
+                <div class="col-md-3"><label class="form-label">Data Aquisição</label><input type="date" class="form-control" name="data_aquisicao"></div>
+                <div class="col-md-2"><label class="form-label">Ano Fabrico</label><input type="number" class="form-control" name="ano_fabrico"></div>
+                <div class="col-md-3"><label class="form-label">Custo (€)</label><input type="number" step="0.01" class="form-control" name="custo"></div>
+                <div class="col-md-4">
+                    <label class="form-label">Tipo de Entrada</label>
+                    <select class="form-select" name="tipo_entrada">
+                        <option>Compra</option><option>Doação</option><option>Aluguer</option><option>Empréstimo</option>
+                    </select>
+                </div>
+                <div class="col-md-3"><label class="form-label">Estado Atual</label><select class="form-select" name="estado"><option>Operacional</option><option>Em Manutenção</option><option>Abatido</option></select></div>
+                <div class="col-md-3"><label class="form-label">Criticidade</label><select class="form-select" name="criticidade"><option>Baixa</option><option>Média</option><option>Alta</option></select></div>
+            </div>
+            <h5 class="text-secondary border-bottom pb-2 mb-3">Localização Física</h5>
+            <div class="row g-3 mb-4">
+                <div class="col-md-3"><label class="form-label">Edifício</label><input type="text" class="form-control" name="edificio"></div>
+                <div class="col-md-2"><label class="form-label">Piso</label><input type="text" class="form-control" name="piso"></div>
+                <div class="col-md-4"><label class="form-label">Serviço/Departamento</label><input type="text" class="form-control" name="servico"></div>
+                <div class="col-md-3"><label class="form-label">Sala/Gabinete</label><input type="text" class="form-control" name="sala"></div>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label">Observações</label>
+                <textarea class="form-control" name="observacoes" rows="2"></textarea>
+            </div>
+            
+            <div class="d-flex justify-content-end gap-2">
+                <a href="../equipamentos/equipamentos.html" class="btn btn-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-primary px-4">Guardar Equipamento</button>
+            </div>
        
     </div>
         
