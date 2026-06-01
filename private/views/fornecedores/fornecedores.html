@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="../../../assets/fontawesome/all.min.css">
     <link rel="shortcut icon" href="../../../assets/img/logo 125.png" type="image/png">
 
+
 </head>
 <body class="bg-light">
 
@@ -33,7 +34,7 @@
         <div class="p-3">
             <h5 class="text-primary fw-bold mb-4">Módulos</h5>
             <ul class="nav nav-pills flex-column mb-auto">
-               <li><a href="../equipamentos/equipamentos.html" class="nav-link text-dark"><i class="fa-solid fa-microchip me-2"></i>Equipamentos</a></li>
+                <li><a href="../equipamentos/equipamentos.html" class="nav-link text-dark"><i class="fa-solid fa-microchip me-2"></i>Equipamentos</a></li>
                 <li><a href="../fornecedores/fornecedores.html" class="nav-link text-dark"><i class="fa-solid fa-truck-medical me-2"></i>Fornecedores</a></li>
                 <li><a href="../localizacoes/localizações.html" class="nav-link text-dark"><i class="fa-solid fa-map-location-dot me-2"></i>Localizações</a></li>
                 <li><a href="../garantias/garantias.html" class="nav-link text-dark"><i class="fa-solid fa-shield-halved me-2"></i>Garantias</a></li>
@@ -43,10 +44,37 @@
     </nav>
 
     <main class="flex-grow-1 p-5 fundo-dashboard">
-        <div class="bg-white bg-opacity-75 p-5 rounded shadow-sm"><h2>Fornecedores</h2>
-        <p>Bem-vindo à área de gestão. Selecione uma opção na barra lateral.</p>
-        <!--posteriormente meter retoques finais para completar a dashboard-->
+        <div class="bg-white bg-opacity-75 p-5 rounded shadow-sm"> 
+           <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Lista de Fonecedores</h2>
+            <a href="novo.html" class="btn btn-primary">
+            <i class="fa-solid fa-plus me-2"></i>Novo Fornecedor
+            </a>
+           </div>
 
+       <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Nome da Empresa</th>
+                    <th>NIF</th>
+                    <th>Contacto</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Siemens Healthineers</td>
+                    <td>500123456</td>
+                    <td>geral@siemens.pt</td>
+                    <td>
+                        <a href="editar.html?id=1" class="btn btn-sm btn-outline-warning"><i class="fa-solid fa-pen"></i></a>
+                        <a href="apagar.html?id=1" class="btn btn-sm btn-outline-danger"><i class="fa-solid fa-trash"></i></a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+       </div>
     </div>
         
         </main>
