@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SanoGest | Novo Equipamento</title>
+    <link rel="stylesheet" href="../../../assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../../../assets/css/1240881.css">
+    <link rel="stylesheet" href="../../../assets/fontawesome/all.min.css">
+    <link rel="shortcut icon" href="../../../assets/img/logo 125.png" type="image/png">
+
+
+</head>
+<body class="bg-light">
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="../../../private/index.html">
+                <img src="../../../assets/img/logo 255.png" alt="Logo SanoGest" style="height: 35px;" class="me-2">
+                SanoGest Admin</a>
+            
+        </div>
+    </nav>
+<div class="d-flex">
+    <nav class="bg-white border-end shadow-sm" style="width: 250px; min-height: 100vh;">
+        <div class="p-3">
+            <h5 class="text-primary fw-bold mb-4">Módulos</h5>
+            <ul class="nav nav-pills flex-column mb-auto">
+                <li><a href="../equipamentos/equipamentos.html" class="nav-link text-dark"><i class="fa-solid fa-microchip me-2"></i>Equipamentos</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="flex-grow-1 p-5 fundo-dashboard">
+        <div class="bg-white bg-opacity-75 p-5 rounded shadow-sm">
+        <h2 class="mb-4 text-warning"><i class="fa-solid fa-pen-to-square me-2"></i>Editar Equipamento: EQP-001</h2>
+        
+        <form action="processar_editar.php" method="POST">
+            <input type="hidden" name="id" value="1">
+
+            <h5 class="text-secondary border-bottom pb-2 mb-3">Identificação</h5>
+            <div class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <label class="form-label">Cód. Inventário</label>
+                    <input type="text" class="form-control" name="codigo_inventario" value="EQP-001" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Designação</label>
+                    <input type="text" class="form-control" name="designacao" value="Ventilador Dräger Evita V500" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Categoria</label>
+                    <input type="text" class="form-control" name="categoria" value="Suporte de Vida">
+                </div>
+            </div>
+
+            <h5 class="text-secondary border-bottom pb-2 mb-3">Aquisição e Estado</h5>
+            <div class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <label class="form-label">Estado Atual</label>
+                    <select class="form-select" name="estado">
+                        <option value="Operacional" selected>Operacional</option>
+                        <option value="Manutencao">Em Manutenção</option>
+                        <option value="Abatido">Abatido</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Criticidade</label>
+                    <select class="form-select" name="criticidade">
+                        <option value="Baixa">Baixa</option>
+                        <option value="Media">Média</option>
+                        <option value="Alta" selected>Alta</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Custo (€)</label>
+                    <input type="number" step="0.01" class="form-control" name="custo" value="12500.00">
+                </div>
+            </div>
+
+            <h5 class="text-secondary border-bottom pb-2 mb-3">Localização</h5>
+            <div class="row g-3 mb-4">
+                <div class="col-md-3"><label class="form-label">Edifício</label><input type="text" class="form-control" name="edificio" value="A"></div>
+                <div class="col-md-2"><label class="form-label">Piso</label><input type="text" class="form-control" name="piso" value="1"></div>
+                <div class="col-md-4"><label class="form-label">Serviço</label><input type="text" class="form-control" name="servico" value="Bloco Operatório"></div>
+            </div>
+            
+            <div class="d-flex justify-content-end gap-2">
+                <a href="equipamentos.html" class="btn btn-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-warning px-4 text-white">Guardar Alterações</button>
+            </div>
+        </form>
+    </div>
+        
+        </main>
+</div>
+    
+    <script src="../assets/js/bootstrap.bundle.min.js"></script>
+    
+</body>
+</html>
