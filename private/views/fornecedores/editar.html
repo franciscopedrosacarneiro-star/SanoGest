@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SanoGest | Novo Equipamento</title>
+    <link rel="stylesheet" href="../../../assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../../../assets/css/1240881.css">
+    <link rel="stylesheet" href="../../../assets/fontawesome/all.min.css">
+    <link rel="shortcut icon" href="../../../assets/img/logo 125.png" type="image/png">
+
+
+</head>
+<body class="bg-light">
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="../../../private/index.html">
+                <img src="../../../assets/img/logo 255.png" alt="Logo SanoGest" style="height: 35px;" class="me-2">
+                SanoGest Admin</a>
+            
+        </div>
+    </nav>
+<div class="d-flex">
+    <nav class="bg-white border-end shadow-sm" style="width: 250px; min-height: 100vh;">
+        <div class="p-3">
+            <h5 class="text-primary fw-bold mb-4">Módulos</h5>
+            <ul class="nav nav-pills flex-column mb-auto">
+                <li><a href="fornecedores.html" class="nav-link text-dark"><i class="fa-solid fa-truck-medical me-2"></i>Fornecedores</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="flex-grow-1 p-5 fundo-dashboard">
+        <div class="bg-white bg-opacity-75 p-5 rounded shadow-sm"> 
+           <h2 class="mb-4 text-warning"><i class="fa-solid fa-pen-to-square"></i>Editar Fornecedor: Siemens Healthineers</h2>
+            
+           
+            
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Nome da Empresa</label>
+                    <input type="text" class="form-control" name="codigo_inventario" value="Siemens Healthineers" required></div>
+                
+                <div class="col-md-3"><label class="form-label fw-bold">NIF</label>
+                    <input type="text" class="form-control" name="nif" value="500123456" required></div>
+
+                <div class="col-md-3"><label class="form-lab fw-bold">Telefone</label>
+                    <input type="tel" class="form-control" name="telefone" value="210000000"></div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Email de Contacto</label>
+                    <input type="email" class="form-control" name="email" value="geral@siemens.pt">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Morada</label>
+                    <input type="text" class="form-control" name="morada" value="Av. da Liberdade, Lisboa">
+                </div>
+                <div class="col-12">
+                    <label class="form-label fw-bold">Observações / Notas</label>
+                    <textarea class="form-control" name="observacoes" rows="2">Fornecedor preferencial para equipamentos de diagnóstico.</textarea>
+                </div>
+            <div class="d-flex justify-content-end gap-2">
+                <a href="fornecedores.html" class="btn btn-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-primary px-4">Guardar Alterações</button>
+            </div>
+       
+    </div>
+        
+        </main>
+</div>
+    
+    <script src="../assets/js/bootstrap.bundle.min.js"></script>
+    
+</body>
+</html>
