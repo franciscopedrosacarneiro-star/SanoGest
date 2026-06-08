@@ -49,6 +49,29 @@
                     <input type="tel" class="form-control" name="telefone"></div>
                 
             </div>
+            <div class="row g-3">
+                <div class="col-md-6">
+                      <label class="form-label fw-bold">Pessoa de Contacto</label>
+                      <input type="text" class="form-control" name="pessoa_contacto">
+                </div>
+             <div class="col-md-6">
+                      <label class="form-label fw-bold">Telefone (Pessoa de Contacto)</label>
+                      <input type="tel" class="form-control" name="tel_pessoa">
+             </div>
+            <div class="col-md-6">
+                      <label class="form-label fw-bold">Website</label>
+                      <input type="url" class="form-control" name="website" placeholder="https://www.exemplo.pt">
+            </div>
+            <div class="col-md-6">
+                     <label class="form-label fw-bold">Tipo de Fornecedor</label>
+                     <select class="form-select" name="tipo_fornecedor" required>
+                        <option value="Fabricante">Fabricante</option>
+                        <option value="Distribuidor">Distribuidor / Fornecedor Comercial</option>
+                        <option value="Assistência">Empresa de Assistência Técnica</option>
+                        <option value="Consumíveis">Fornecedor de Consumíveis/Acessórios</option>
+                        </select>
+            </div>
+            </div>
                 <div class="col-md-6">
                     <label class="form-label fw-bold">Email de Contacto</label>
                     <input type="email" class="form-control" name="email">
