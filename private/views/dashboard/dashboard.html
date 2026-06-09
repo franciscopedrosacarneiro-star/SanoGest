@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="../../../assets/css/1240881.css">
     <link rel="stylesheet" href="../../../assets/fontawesome/all.min.css">
     <link rel="shortcut icon" href="../../../assets/img/logo 125.png" type="image/png">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 
 </head>
@@ -102,12 +103,62 @@
                     </div>
                 </div>
             </div>
+            <div class="row g-4 mt-2">
+    <div class="col-md-6">
+        <div class="card shadow-sm p-3">
+            <div class="card-header bg-white border-0 fw-bold">Distribuição do Estado dos Equipamentos</div>
+            <div class="card-body">
+                <canvas id="estadoEquipamentosChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card shadow-sm p-3">
+            <div class="card-header bg-white border-0 fw-bold">Equipamentos por Edifício</div>
+            <div class="card-body">
+                <canvas id="edificiosChart" height="150"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
 
         </div>
     </main>
 </div>
-    
-    <script src="../../../assets/js/bootstrap.bundle.min.js"></script>
-    
+     <script src="../../../assets/js/bootstrap.bundle.min.js"></script>
+    <script>
+    // Gráfico de Estado (Pizza/Queijo)
+    const ctx = document.getElementById('estadoEquipamentosChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: ['Operacionais', 'Em Manutenção', 'Abatidos'],
+            datasets: [{
+                data: [128, 11, 3], // Estes números virão do teu PHP
+                backgroundColor: ['#28a745', '#ffc107', '#dc3545']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false // Isto impede o gráfico de tentar ocupar todo o espaço do pai
+        }
+    });
+
+    // Gráfico de Edifícios (Barras)
+    const ctx2 = document.getElementById('edificiosChart').getContext('2d');
+    new Chart(ctx2, {
+        type: 'bar',
+        data: {
+            labels: ['Edifício A', 'Edifício B', 'Edifício C'],
+            datasets: [{
+                label: 'Nº Equipamentos',
+                data: [65, 45, 32],
+                backgroundColor: '#0d6efd'
+            }]
+        }
+        
+    });
+</script>
 </body>
 </html>
