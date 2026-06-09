@@ -46,16 +46,68 @@
     </nav>
 
     <main class="flex-grow-1 p-5 fundo-dashboard">
-        <div class="bg-white bg-opacity-75 p-5 rounded shadow-sm"><h2>Dashboard</h2>
-        <p>Bem-vindo à área de gestão. Selecione uma opção na barra lateral.</p>
-        <!--posteriormente meter retoques finais para completar a dashboard-->
+        <div class="bg-white bg-opacity-75 p-5 rounded shadow-sm">
+            
+            <div class="mb-4">
+                <h2 class="text-primary fw-bold">Dashboard de Gestão</h2>
+                <p class="text-muted">Bem-vindo, Administrador. Aqui está o resumo do estado atual do parque de equipamentos.</p>
+            </div>
 
-    </div>
-        
-        </main>
+            <div class="row g-4 mb-5">
+                <div class="col-md-3">
+                    <div class="card p-4 shadow-sm border-0 border-start border-primary border-5 h-100">
+                        <div class="text-muted mb-2"><i class="fa-solid fa-microchip me-1"></i> Total Equipamentos</div>
+                        <h3 class="fw-bold">142</h3>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card p-4 shadow-sm border-0 border-start border-success border-5 h-100">
+                        <div class="text-muted mb-2"><i class="fa-solid fa-check-circle me-1"></i> Operacionais</div>
+                        <h3 class="fw-bold">128</h3>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card p-4 shadow-sm border-0 border-start border-warning border-5 h-100">
+                        <div class="text-muted mb-2"><i class="fa-solid fa-screwdriver-wrench me-1"></i> Em Manutenção</div>
+                        <h3 class="fw-bold">11</h3>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card p-4 shadow-sm border-0 border-start border-danger border-5 h-100">
+                        <div class="text-muted mb-2"><i class="fa-solid fa-triangle-exclamation me-1"></i> Abatidos</div>
+                        <h3 class="fw-bold">3</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header bg-white fw-bold py-3"><i class="fa-solid fa-clock-rotate-left me-2"></i>Últimas Atividades</div>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">EQP-001: Manutenção preventiva concluída</li>
+                            <li class="list-group-item">Novo equipamento registado: EQP-045</li>
+                            <li class="list-group-item">Calibração agendada para EQP-012</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header bg-white fw-bold py-3"><i class="fa-solid fa-bell me-2"></i>Alertas de Garantia</div>
+                        <div class="card-body">
+                            <div class="alert alert-warning mb-0">
+                                <strong>Aviso:</strong> Garantia do EQP-008 expira em 15 dias.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
 </div>
     
-    <script src="../assets/js/bootstrap.bundle.min.js"></script>
+    <script src="../../../assets/js/bootstrap.bundle.min.js"></script>
     
 </body>
 </html>
