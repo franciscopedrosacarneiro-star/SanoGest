@@ -59,8 +59,22 @@ footer .text-primary { text-transform: uppercase; font-size: 0.9rem; }
     background-color: #0d6efd;
     color: white !important;
 }
+.sidebar-fixa {
+    position: fixed !important;
+    top: 57px;                 /* Fica colada logo abaixo da Navbar */
+    left: 0;
+    width: 250px;
+    height: calc(100vh - 57px); /* Ocupa o ecrã vertical todo */
+    overflow-y: auto;          /* Se tiveres muitos módulos, cria scroll interno */
+    z-index: 1020;             /* Fica sempre por cima do conteúdo ao rolar */
+}
+
+.conteudo-principal {
+    margin-left: 250px;        /* Dá o espaço exato para a sidebar não tapar o dashboard */
+    width: calc(100% - 250px)
 
 /* Opcional: esconder a barra em telemóveis */
+}
 @media (max-width: 768px) {
     .sidebar { display: none; }
 }
