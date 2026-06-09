@@ -28,12 +28,49 @@
         
         <div class="collapse navbar-collapse" id="navPrivada">
             <ul class="navbar-nav ms-auto">
-               <li class="nav-item"><a class="nav-link text-warning" href="../public/index.html">Sair</a></li>
+                
+                <li class="nav-item dropdown">
+                    <a class="btn btn-primary dropdown-toggle text-white fw-bold px-3" 
+                       href="#" 
+                       id="menuUtilizador" 
+                       role="button" 
+                       data-bs-toggle="dropdown" 
+                       aria-expanded="false">
+                        <i class="fa-solid fa-user me-2"></i>Utilizador
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2" aria-labelledby="menuUtilizador">
+                        <li>
+                            <a class="dropdown-item py-2" href="../../../private/views/perfil/alterar-senha.html">
+                                <i class="fa-solid fa-key me-2 text-muted"></i>Trocar palavra-passe
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item py-2 text-danger" href="../../../public/index.html">
+                                <i class="fa-solid fa-right-from-bracket me-2"></i>Sair
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                
             </ul>
         </div>
         
     </div>
 </nav>
+<div>
+    <nav class="bg-white border-end shadow-sm sidebar-fixa">
+        <div class="p-3">
+            <ul class="nav nav-pills flex-column mb-auto">
+                <li><a href="../private/views/dashboard/dashboard.html" class="nav-link text-dark"><i class="fa-solid fa-gauge me-2"></i>Dashboard</a></li>
+                <li><a href="../private/views/equipamentos/equipamentos.html" class="nav-link text-dark"><i class="fa-solid fa-microchip me-2"></i>Equipamentos</a></li>
+                <li><a href="../private/views/fornecedores/fornecedores.html" class="nav-link text-dark"><i class="fa-solid fa-truck-medical me-2"></i>Fornecedores</a></li>
+                <li><a href="../private/views/localizacoes/localizacoes.html" class="nav-link text-dark"><i class="fa-solid fa-map-location-dot me-2"></i>Localizações</a></li>
+                <li><a href="../private/views/garantias/garantias.html" class="nav-link text-dark"><i class="fa-solid fa-shield-halved me-2"></i>Garantias</a></li>
+                <li><a href="../private/views/documentacao/documentacao.html" class="nav-link text-dark"><i class="fa-solid fa-file-contract me-2"></i>Documentação</a></li>
+            </ul>
+        </div>
+    </nav>
 <div>
     <nav class="bg-white border-end shadow-sm sidebar-fixa">
         <div class="p-3">
