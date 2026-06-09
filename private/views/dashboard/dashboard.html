@@ -48,117 +48,81 @@
 
     <main class="flex-grow-1 p-5 fundo-dashboard">
         <div class="bg-white bg-opacity-75 p-5 rounded shadow-sm">
+         <h5 class="text-secondary border-bottom pb-2 mb-3">Estado Global do Parque Tecnológico</h5>
+        <div class="row g-3 mb-4">
+            <div class="col-md-3"><div class="card p-3 shadow-sm border-start border-primary border-5 h-100"><h6>Total Equipamentos</h6><h3 class="fw-bold mb-0">142</h3></div></div>
+            <div class="col-md-3"><div class="card p-3 shadow-sm border-start border-success border-5 h-100"><h6>Ativos</h6><h3 class="fw-bold mb-0">128</h3></div></div>
+            <div class="col-md-3"><div class="card p-3 shadow-sm border-start border-warning border-5 h-100"><h6>Em Manutenção</h6><h3 class="fw-bold mb-0">11</h3></div></div>
+            <div class="col-md-3"><div class="card p-3 shadow-sm border-start border-danger border-5 h-100"><h6>Inativos/Abatidos</h6><h3 class="fw-bold mb-0">3</h3></div></div>
+        </div>
+
+        <h5 class="text-secondary border-bottom pb-2 mb-3 mt-4">Alertas e Conformidade</h5>
+        <div class="row g-3 mb-4 text-center">
+            <div class="col-md-3">
+                <div class="card p-3 shadow-sm h-100 bg-light border-danger">
+                    <i class="fa-solid fa-calendar-xmark text-danger mb-2 fs-3"></i>
+                    <h6 class="text-danger fw-bold">Garantia Expirada</h6>
+                    <h4 class="fw-bold mb-0">5</h4>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card p-3 shadow-sm h-100 bg-light border-warning">
+                    <i class="fa-solid fa-clock text-warning mb-2 fs-3"></i>
+                    <h6 class="text-warning fw-bold">Garantia < 30 dias</h6>
+                    <h4 class="fw-bold mb-0">8</h4>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card p-3 shadow-sm h-100 bg-light border-secondary">
+                    <i class="fa-solid fa-file-circle-exclamation text-secondary mb-2 fs-3"></i>
+                    <h6 class="text-secondary fw-bold">Sem Documentação</h6>
+                    <h4 class="fw-bold mb-0">12</h4>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card p-3 shadow-sm h-100 bg-light border-dark">
+                    <i class="fa-solid fa-triangle-exclamation text-dark mb-2 fs-3"></i>
+                    <h6 class="text-dark fw-bold">Criticidade Elevada</h6>
+                    <h4 class="fw-bold mb-0">18</h4>
+                </div>
+            </div>
+        </div>
+
+        <h5 class="text-secondary border-bottom pb-2 mb-3 mt-4">Distribuição e Análise</h5>
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <div class="card p-3 shadow-sm h-100">
+                    <h6 class="fw-bold mb-3 text-center">Equipamentos por Serviço</h6>
+                    <div style="height: 250px; position: relative;">
+                        <canvas id="graficoServicos"></canvas>
+                    </div>
+                </div>
+            </div>
             
-            <div class="mb-4">
-                <h2 class="text-primary fw-bold">Dashboard de Gestão</h2>
-                <p class="text-muted">Bem-vindo, Administrador. Aqui está o resumo do estado atual do parque de equipamentos.</p>
-            </div>
-
-            <div class="row g-4 mb-5">
-                <div class="col-md-3">
-                    <div class="card p-4 shadow-sm border-0 border-start border-primary border-5 h-100">
-                        <div class="text-muted mb-2"><i class="fa-solid fa-microchip me-1"></i> Total Equipamentos</div>
-                        <h3 class="fw-bold">142</h3>
+            <div class="col-md-6">
+                <div class="card p-3 shadow-sm h-100">
+                    <h6 class="fw-bold mb-3 text-center">Distribuição por Categoria</h6>
+                    <div style="height: 250px; max-width: 300px; margin: auto; position: relative;">
+                        <canvas id="graficoCategorias"></canvas>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="card p-4 shadow-sm border-0 border-start border-success border-5 h-100">
-                        <div class="text-muted mb-2"><i class="fa-solid fa-check-circle me-1"></i> Operacionais</div>
-                        <h3 class="fw-bold">128</h3>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card p-4 shadow-sm border-0 border-start border-warning border-5 h-100">
-                        <div class="text-muted mb-2"><i class="fa-solid fa-screwdriver-wrench me-1"></i> Em Manutenção</div>
-                        <h3 class="fw-bold">11</h3>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card p-4 shadow-sm border-0 border-start border-danger border-5 h-100">
-                        <div class="text-muted mb-2"><i class="fa-solid fa-triangle-exclamation me-1"></i> Abatidos</div>
-                        <h3 class="fw-bold">3</h3>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row g-4">
-                <div class="col-md-6">
-                    <div class="card shadow-sm h-100">
-                        <div class="card-header bg-white fw-bold py-3"><i class="fa-solid fa-clock-rotate-left me-2"></i>Últimas Atividades</div>
-                        <ul class="list-group list-group-flush">
-                            <li class="list-group-item">EQP-001: Manutenção preventiva concluída</li>
-                            <li class="list-group-item">Novo equipamento registado: EQP-045</li>
-                            <li class="list-group-item">Calibração agendada para EQP-012</li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card shadow-sm h-100">
-                        <div class="card-header bg-white fw-bold py-3"><i class="fa-solid fa-bell me-2"></i>Alertas de Garantia</div>
-                        <div class="card-body">
-                            <div class="alert alert-warning mb-0">
-                                <strong>Aviso:</strong> Garantia do EQP-008 expira em 15 dias.
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row g-4 mt-2">
-    <div class="col-md-6">
-        <div class="card shadow-sm p-3">
-            <div class="card-header bg-white border-0 fw-bold">Distribuição do Estado dos Equipamentos</div>
-            <div class="card-body">
-                <canvas id="estadoEquipamentosChart" height="250"></canvas>
             </div>
         </div>
-    </div>
-    
-    <div class="col-md-6">
-        <div class="card shadow-sm p-3">
-            <div class="card-header bg-white border-0 fw-bold">Equipamentos por Edifício</div>
-            <div class="card-body">
-                <canvas id="edificiosChart" height="150"></canvas>
-            </div>
-        </div>
-    </div>
-</div>
 
+        <div class="row g-4">
+            <div class="col-md-12">
+                <div class="card p-3 shadow-sm h-100">
+                    <h6 class="fw-bold mb-3 text-center">Equipamentos de Suporte de Vida por Serviço</h6>
+                    <div style="height: 220px; position: relative;">
+                        <canvas id="graficoSuporteVida"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>   
         </div>
     </main>
+    <script src="../../../assets/js/bootstrap.bundle.min.js"></script>
+<script src="../../../assets/js/funcoes.js"></script>
 </div>
-     <script src="../../../assets/js/bootstrap.bundle.min.js"></script>
-    <script>
-    // Gráfico de Estado (Pizza/Queijo)
-    const ctx = document.getElementById('estadoEquipamentosChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'pie',
-        data: {
-            labels: ['Operacionais', 'Em Manutenção', 'Abatidos'],
-            datasets: [{
-                data: [128, 11, 3], // Estes números virão do teu PHP
-                backgroundColor: ['#28a745', '#ffc107', '#dc3545']
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false // Isto impede o gráfico de tentar ocupar todo o espaço do pai
-        }
-    });
-
-    // Gráfico de Edifícios (Barras)
-    const ctx2 = document.getElementById('edificiosChart').getContext('2d');
-    new Chart(ctx2, {
-        type: 'bar',
-        data: {
-            labels: ['Edifício A', 'Edifício B', 'Edifício C'],
-            datasets: [{
-                label: 'Nº Equipamentos',
-                data: [65, 45, 32],
-                backgroundColor: '#0d6efd'
-            }]
-        }
-        
-    });
-</script>
 </body>
 </html>
