@@ -77,3 +77,45 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 });
+document.addEventListener("DOMContentLoaded", function () {
+    const pesquisaEquipamento = document.getElementById("pesquisaEquipamento");
+    const filtroCategoria = document.getElementById("filtroCategoria");
+    const filtroEstado = document.getElementById("filtroEstado");
+    const filtroCriticidade = document.getElementById("filtroCriticidade");
+    const linhasEquipamentos = document.querySelectorAll("#tabelaEquipamentos tbody tr");
+
+    function filtrarEquipamentos() {
+        const textoPesquisa = pesquisaEquipamento.value.toLowerCase();
+        const categoriaSelecionada = filtroCategoria.value;
+        const estadoSelecionado = filtroEstado.value;
+        const criticidadeSelecionada = filtroCriticidade.value;
+
+        linhasEquipamentos.forEach(function (linha) {
+            const textoLinha = linha.innerText.toLowerCase();
+            const categoriaLinha = linha.getAttribute("data-categoria");
+            const estadoLinha = linha.getAttribute("data-estado");
+            const criticidadeLinha = linha.getAttribute("data-criticidade");
+
+            const correspondePesquisa = textoLinha.includes(textoPesquisa);
+            const correspondeCategoria = categoriaSelecionada === "" || categoriaLinha === categoriaSelecionada;
+            const correspondeEstado = estadoSelecionado === "" || estadoLinha === estadoSelecionado;
+            const correspondeCriticidade = criticidadeSelecionada === "" || criticidadeLinha === criticidadeSelecionada;
+
+            if (
+                correspondePesquisa &&
+                correspondeCategoria &&
+                correspondeEstado &&
+                correspondeCriticidade
+            ) {
+                linha.style.display = "";
+            } else {
+                linha.style.display = "none";
+            }
+        });
+    }
+
+    pesquisaEquipamento.addEventListener("input", filtrarEquipamentos);
+    filtroCategoria.addEventListener("change", filtrarEquipamentos);
+    filtroEstado.addEventListener("change", filtrarEquipamentos);
+    filtroCriticidade.addEventListener("change", filtrarEquipamentos);
+});
