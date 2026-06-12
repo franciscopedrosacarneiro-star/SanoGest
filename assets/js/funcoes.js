@@ -78,6 +78,68 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 });
 document.addEventListener("DOMContentLoaded", function () {
+    // =====================================================
+// 5. ALTERAR PALAVRA-PASSE
+// =====================================================
+
+const formAlterarSenha = document.getElementById("formAlterarSenha");
+const senhaAtual = document.getElementById("senhaAtual");
+const novaSenha = document.getElementById("novaSenha");
+const confirmarSenha = document.getElementById("confirmarSenha");
+const mensagemSenha = document.getElementById("mensagemSenha");
+
+if (formAlterarSenha && senhaAtual && novaSenha && confirmarSenha && mensagemSenha) {
+
+    function validarSenhas() {
+        novaSenha.setCustomValidity("");
+        confirmarSenha.setCustomValidity("");
+
+        if (novaSenha.value.length < 6 || novaSenha.value.length > 12) {
+            mensagemSenha.textContent = "A nova palavra-passe deve ter entre 6 e 12 caracteres.";
+            mensagemSenha.className = "form-text text-danger";
+            novaSenha.setCustomValidity("A nova palavra-passe deve ter entre 6 e 12 caracteres.");
+            return false;
+        }
+
+        if (confirmarSenha.value.length < 6 || confirmarSenha.value.length > 12) {
+            mensagemSenha.textContent = "A confirmação deve ter entre 6 e 12 caracteres.";
+            mensagemSenha.className = "form-text text-danger";
+            confirmarSenha.setCustomValidity("A confirmação deve ter entre 6 e 12 caracteres.");
+            return false;
+        }
+
+        if (novaSenha.value !== confirmarSenha.value) {
+            mensagemSenha.textContent = "As palavras-passe não coincidem.";
+            mensagemSenha.className = "form-text text-danger";
+            confirmarSenha.setCustomValidity("As palavras-passe não coincidem.");
+            return false;
+        }
+
+        if (senhaAtual.value !== "" && senhaAtual.value === novaSenha.value) {
+            mensagemSenha.textContent = "A nova palavra-passe deve ser diferente da atual.";
+            mensagemSenha.className = "form-text text-danger";
+            novaSenha.setCustomValidity("A nova palavra-passe deve ser diferente da atual.");
+            return false;
+        }
+
+        mensagemSenha.textContent = "As palavras-passe coincidem.";
+        mensagemSenha.className = "form-text text-success";
+        novaSenha.setCustomValidity("");
+        confirmarSenha.setCustomValidity("");
+        return true;
+    }
+
+    novaSenha.addEventListener("input", validarSenhas);
+    confirmarSenha.addEventListener("input", validarSenhas);
+    senhaAtual.addEventListener("input", validarSenhas);
+
+    formAlterarSenha.addEventListener("submit", function(event) {
+        if (!validarSenhas()) {
+            event.preventDefault();
+            formAlterarSenha.reportValidity();
+        }
+    });
+}
 // Filtros da página de Fornecedores
 const pesquisaFornecedor = document.getElementById("pesquisaFornecedor");
 const filtroTipoFornecedor = document.getElementById("filtroTipoFornecedor");
