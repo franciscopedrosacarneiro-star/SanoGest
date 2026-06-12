@@ -78,6 +78,220 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 });
 document.addEventListener("DOMContentLoaded", function () {
+// =====================================================
+// 6. FORMULÁRIO POR PASSOS - NOVO FORNECEDOR
+// =====================================================
+
+const formNovoFornecedor = document.getElementById("formNovoFornecedor");
+const passosFornecedor = document.querySelectorAll(".passo-fornecedor");
+const botoesPassosFornecedor = document.querySelectorAll("[data-passo-fornecedor]");
+const btnAnteriorFornecedor = document.getElementById("btnAnteriorFornecedor");
+const btnSeguinteFornecedor = document.getElementById("btnSeguinteFornecedor");
+const btnGuardarFornecedor = document.getElementById("btnGuardarFornecedor");
+
+if (
+    formNovoFornecedor &&
+    passosFornecedor.length > 0 &&
+    btnAnteriorFornecedor &&
+    btnSeguinteFornecedor &&
+    btnGuardarFornecedor
+) {
+    let passoAtualFornecedor = 1;
+
+    function mostrarPassoFornecedor(numeroPasso) {
+        passosFornecedor.forEach(function(passo) {
+            passo.classList.add("d-none");
+        });
+
+        const passoSelecionado = document.getElementById("passoFornecedor" + numeroPasso);
+
+        if (passoSelecionado) {
+            passoSelecionado.classList.remove("d-none");
+        }
+
+        botoesPassosFornecedor.forEach(function(botao) {
+            botao.classList.remove("active");
+
+            if (parseInt(botao.getAttribute("data-passo-fornecedor")) === numeroPasso) {
+                botao.classList.add("active");
+            }
+        });
+
+        btnAnteriorFornecedor.disabled = numeroPasso === 1;
+
+        if (numeroPasso === passosFornecedor.length) {
+            btnSeguinteFornecedor.classList.add("d-none");
+            btnGuardarFornecedor.classList.remove("d-none");
+        } else {
+            btnSeguinteFornecedor.classList.remove("d-none");
+            btnGuardarFornecedor.classList.add("d-none");
+        }
+    }
+
+    function validarPassoFornecedorAtual() {
+        const passoVisivel = document.getElementById("passoFornecedor" + passoAtualFornecedor);
+
+        if (!passoVisivel) {
+            return false;
+        }
+
+        const campos = passoVisivel.querySelectorAll("input, select, textarea");
+
+        for (let campo of campos) {
+            if (!campo.checkValidity()) {
+                campo.reportValidity();
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    btnSeguinteFornecedor.addEventListener("click", function() {
+        if (validarPassoFornecedorAtual() && passoAtualFornecedor < passosFornecedor.length) {
+            passoAtualFornecedor++;
+            mostrarPassoFornecedor(passoAtualFornecedor);
+        }
+    });
+
+    btnAnteriorFornecedor.addEventListener("click", function() {
+        if (passoAtualFornecedor > 1) {
+            passoAtualFornecedor--;
+            mostrarPassoFornecedor(passoAtualFornecedor);
+        }
+    });
+
+    botoesPassosFornecedor.forEach(function(botao) {
+        botao.addEventListener("click", function() {
+            const passoDestino = parseInt(this.getAttribute("data-passo-fornecedor"));
+
+            if (passoDestino < passoAtualFornecedor || validarPassoFornecedorAtual()) {
+                passoAtualFornecedor = passoDestino;
+                mostrarPassoFornecedor(passoAtualFornecedor);
+            }
+        });
+    });
+
+    formNovoFornecedor.addEventListener("submit", function(event) {
+        if (!formNovoFornecedor.checkValidity()) {
+            event.preventDefault();
+            formNovoFornecedor.reportValidity();
+        }
+    });
+
+    mostrarPassoFornecedor(passoAtualFornecedor);
+}
+// =====================================================
+// 7. FORMULÁRIO POR PASSOS - EDITAR FORNECEDOR
+// =====================================================
+
+const formEditarFornecedor = document.getElementById("formEditarFornecedor");
+const passosEditarFornecedor = document.querySelectorAll(".passo-editar-fornecedor");
+const botoesPassosEditarFornecedor = document.querySelectorAll("[data-passo-editar-fornecedor]");
+const btnAnteriorEditarFornecedor = document.getElementById("btnAnteriorEditarFornecedor");
+const btnSeguinteEditarFornecedor = document.getElementById("btnSeguinteEditarFornecedor");
+const btnGuardarEditarFornecedor = document.getElementById("btnGuardarEditarFornecedor");
+const btnReporEditarFornecedor = document.getElementById("btnReporEditarFornecedor");
+
+if (
+    formEditarFornecedor &&
+    passosEditarFornecedor.length > 0 &&
+    btnAnteriorEditarFornecedor &&
+    btnSeguinteEditarFornecedor &&
+    btnGuardarEditarFornecedor &&
+    btnReporEditarFornecedor
+) {
+    let passoAtualEditarFornecedor = 1;
+
+    function mostrarPassoEditarFornecedor(numeroPasso) {
+        passosEditarFornecedor.forEach(function(passo) {
+            passo.classList.add("d-none");
+        });
+
+        const passoSelecionado = document.getElementById("passoEditarFornecedor" + numeroPasso);
+
+        if (passoSelecionado) {
+            passoSelecionado.classList.remove("d-none");
+        }
+
+        botoesPassosEditarFornecedor.forEach(function(botao) {
+            botao.classList.remove("active");
+
+            if (parseInt(botao.getAttribute("data-passo-editar-fornecedor")) === numeroPasso) {
+                botao.classList.add("active");
+            }
+        });
+
+        btnAnteriorEditarFornecedor.disabled = numeroPasso === 1;
+
+        if (numeroPasso === passosEditarFornecedor.length) {
+            btnSeguinteEditarFornecedor.classList.add("d-none");
+            btnGuardarEditarFornecedor.classList.remove("d-none");
+            btnReporEditarFornecedor.classList.remove("d-none");
+        } else {
+            btnSeguinteEditarFornecedor.classList.remove("d-none");
+            btnGuardarEditarFornecedor.classList.add("d-none");
+            btnReporEditarFornecedor.classList.add("d-none");
+        }
+    }
+
+    function validarPassoEditarFornecedorAtual() {
+        const passoVisivel = document.getElementById("passoEditarFornecedor" + passoAtualEditarFornecedor);
+
+        if (!passoVisivel) {
+            return false;
+        }
+
+        const campos = passoVisivel.querySelectorAll("input, select, textarea");
+
+        for (let campo of campos) {
+            if (!campo.checkValidity()) {
+                campo.reportValidity();
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    btnSeguinteEditarFornecedor.addEventListener("click", function() {
+        if (
+            validarPassoEditarFornecedorAtual() &&
+            passoAtualEditarFornecedor < passosEditarFornecedor.length
+        ) {
+            passoAtualEditarFornecedor++;
+            mostrarPassoEditarFornecedor(passoAtualEditarFornecedor);
+        }
+    });
+
+    btnAnteriorEditarFornecedor.addEventListener("click", function() {
+        if (passoAtualEditarFornecedor > 1) {
+            passoAtualEditarFornecedor--;
+            mostrarPassoEditarFornecedor(passoAtualEditarFornecedor);
+        }
+    });
+
+    botoesPassosEditarFornecedor.forEach(function(botao) {
+        botao.addEventListener("click", function() {
+            const passoDestino = parseInt(this.getAttribute("data-passo-editar-fornecedor"));
+
+            if (passoDestino < passoAtualEditarFornecedor || validarPassoEditarFornecedorAtual()) {
+                passoAtualEditarFornecedor = passoDestino;
+                mostrarPassoEditarFornecedor(passoAtualEditarFornecedor);
+            }
+        });
+    });
+
+    formEditarFornecedor.addEventListener("submit", function(event) {
+        if (!formEditarFornecedor.checkValidity()) {
+            event.preventDefault();
+            formEditarFornecedor.reportValidity();
+        }
+    });
+
+    mostrarPassoEditarFornecedor(passoAtualEditarFornecedor);
+}
+
     // =====================================================
 // 5. ALTERAR PALAVRA-PASSE
 // =====================================================
