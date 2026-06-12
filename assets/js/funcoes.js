@@ -78,6 +78,48 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 });
 document.addEventListener("DOMContentLoaded", function () {
+// Filtros da página de Fornecedores
+const pesquisaFornecedor = document.getElementById("pesquisaFornecedor");
+const filtroTipoFornecedor = document.getElementById("filtroTipoFornecedor");
+const filtroEstadoFornecedor = document.getElementById("filtroEstadoFornecedor");
+const linhasFornecedores = document.querySelectorAll("#tabelaFornecedores tbody tr");
+
+if (
+    pesquisaFornecedor &&
+    filtroTipoFornecedor &&
+    filtroEstadoFornecedor &&
+    linhasFornecedores.length > 0
+) {
+    function filtrarFornecedores() {
+        const textoPesquisa = pesquisaFornecedor.value.toLowerCase();
+        const tipoSelecionado = filtroTipoFornecedor.value;
+        const estadoSelecionado = filtroEstadoFornecedor.value;
+
+        linhasFornecedores.forEach(function(linha) {
+            const textoLinha = linha.innerText.toLowerCase();
+            const tipoLinha = linha.getAttribute("data-tipo");
+            const estadoLinha = linha.getAttribute("data-estado");
+
+            const correspondePesquisa = textoLinha.includes(textoPesquisa);
+            const correspondeTipo = tipoSelecionado === "" || tipoLinha === tipoSelecionado;
+            const correspondeEstado = estadoSelecionado === "" || estadoLinha === estadoSelecionado;
+
+            if (
+                correspondePesquisa &&
+                correspondeTipo &&
+                correspondeEstado
+            ) {
+                linha.style.display = "";
+            } else {
+                linha.style.display = "none";
+            }
+        });
+    }
+
+    pesquisaFornecedor.addEventListener("input", filtrarFornecedores);
+    filtroTipoFornecedor.addEventListener("change", filtrarFornecedores);
+    filtroEstadoFornecedor.addEventListener("change", filtrarFornecedores);
+}
     const pesquisaEquipamento = document.getElementById("pesquisaEquipamento");
     const filtroCategoria = document.getElementById("filtroCategoria");
     const filtroEstado = document.getElementById("filtroEstado");
@@ -118,7 +160,7 @@ document.addEventListener("DOMContentLoaded", function () {
     filtroCategoria.addEventListener("change", filtrarEquipamentos);
     filtroEstado.addEventListener("change", filtrarEquipamentos);
     filtroCriticidade.addEventListener("change", filtrarEquipamentos);
-    
+
 });
 // Formulário por passos - Novo Equipamento
 const formNovoEquipamento = document.getElementById("formNovoEquipamento");
