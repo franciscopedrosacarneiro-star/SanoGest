@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SanoGest | Novo Equipamento</title>
+    <title>SanoGest | Editar Localização</title>
     <link rel="stylesheet" href="../../../assets/css/bootstrap.min.css">
     <link rel="stylesheet" href="../../../assets/css/1240881.css">
     <link rel="stylesheet" href="../../../assets/fontawesome/all.min.css">
@@ -66,51 +66,243 @@
             </ul>
         </div>
     </nav>
+<main class="p-5 fundo-dashboard conteudo-principal">
+    <div class="bg-white bg-opacity-75 p-5 rounded shadow-sm">
 
-    <main class="p-5 fundo-dashboard conteudo-principal">
-       <div class="bg-white bg-opacity-75 p-5 rounded shadow-sm">
-            
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="text-warning"><i class="fa-solid fa-pen-to-square me-2"></i>Editar Localização</h2>
-                <a href="localizacoes.html" class="btn btn-secondary"><i class="fa-solid fa-arrow-left me-2"></i>Voltar</a>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="text-warning fw-bold mb-1">
+                    <i class="fa-solid fa-pen-to-square me-2"></i>Editar Localização
+                </h2>
+                <p class="text-muted mb-0">
+                    Atualize os dados da localização física associada aos equipamentos médicos.
+                </p>
             </div>
 
-            <form action="processar_editar_localizacao.php" method="POST">
-                <input type="hidden" name="id" value="1">
-
-                <h5 class="text-secondary border-bottom pb-2 mb-3">Informações da Localização</h5>
-                
-                <div class="row g-3 mb-4">
-                    <div class="col-md-6">
-                        <label class="form-label">Edifício *</label>
-                        <input type="text" class="form-control" name="edificio" value="Edifício A" required>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Piso *</label>
-                        <input type="text" class="form-control" name="piso" value="1" required>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Serviço/Departamento *</label>
-                        <input type="text" class="form-control" name="servico" value="Bloco Operatório" required>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Sala/Gabinete *</label>
-                        <input type="text" class="form-control" name="sala" value="Sala 04" required>
-                    </div>
-                </div>
-
-                <div class="mb-4">
-                    <label class="form-label">Descrição / Observações</label>
-                    <textarea class="form-control" name="observacoes" rows="3">Zona de alta esterilização.</textarea>
-                </div>
-
-                <div class="d-flex justify-content-end gap-2">
-                    <a href="localizacoes.html" class="btn btn-outline-secondary">Cancelar</a>
-                    <button type="submit" class="btn btn-warning px-4 text-white">Guardar Alterações</button>
-                </div>
-            </form>
-
+            <a href="localizacoes.html" class="btn btn-outline-secondary">
+                <i class="fa-solid fa-arrow-left me-2"></i>Voltar
+            </a>
         </div>
+
+        <form action="processar_editar_localizacao.php" method="POST">
+            <input type="hidden" name="id" value="1">
+
+            <!-- Resumo da localização -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="fw-bold text-primary mb-1">
+                            Edifício A | Piso 1 | Bloco Operatório
+                        </h5>
+                        <p class="text-muted mb-0">
+                            <i class="fa-solid fa-door-open me-2"></i>
+                            Sala 04 — zona atualmente ativa.
+                        </p>
+                    </div>
+
+                    <div class="text-end">
+                        <span class="badge bg-success mb-2">Ativa</span>
+                        <p class="text-muted small mb-0">3 equipamentos associados</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informações principais -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white fw-bold text-primary">
+                    <i class="fa-solid fa-map-location-dot me-2"></i>1. Informações da Localização
+                </div>
+
+                <div class="card-body">
+                    <div class="row g-3">
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Edifício *</label>
+                            <input 
+                                type="text" 
+                                class="form-control" 
+                                name="edificio" 
+                                value="Edifício A"
+                                pattern="[A-Za-zÀ-ÿ0-9\s\-]+"
+                                title="O edifício só pode conter letras, números, espaços e hífen."
+                                minlength="1"
+                                maxlength="40"
+                                required
+                            >
+                            <div class="form-text">Letras, números, espaços e hífen.</div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="form-label fw-bold">Piso *</label>
+                            <input 
+                                type="number" 
+                                class="form-control" 
+                                name="piso" 
+                                value="1"
+                                min="0"
+                                max="20"
+                                required
+                            >
+                            <div class="form-text">Entre 0 e 20.</div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">Serviço/Departamento *</label>
+                            <input 
+                                type="text" 
+                                class="form-control" 
+                                name="servico" 
+                                value="Bloco Operatório"
+                                pattern="[A-Za-zÀ-ÿ0-9\s\-\/]+"
+                                title="O serviço só pode conter letras, números, espaços, hífen e barra."
+                                minlength="3"
+                                maxlength="80"
+                                required
+                            >
+                            <div class="form-text">Ex: Bloco Operatório, UCI, Radiologia.</div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">Sala/Gabinete *</label>
+                            <input 
+                                type="text" 
+                                class="form-control" 
+                                name="sala" 
+                                value="Sala 04"
+                                pattern="[A-Za-zÀ-ÿ0-9\s\-]+"
+                                title="A sala/gabinete só pode conter letras, números, espaços e hífen."
+                                minlength="2"
+                                maxlength="40"
+                                required
+                            >
+                            <div class="form-text">Ex: Sala 04, Box 03.</div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Caracterização -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white fw-bold text-primary">
+                    <i class="fa-solid fa-hospital me-2"></i>2. Caracterização do Espaço
+                </div>
+
+                <div class="card-body">
+                    <div class="row g-3">
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Tipo de Área</label>
+                            <select class="form-select" name="tipo_area">
+                                <option>Área Crítica</option>
+                                <option selected>Bloco Operatório</option>
+                                <option>Diagnóstico</option>
+                                <option>Internamento</option>
+                                <option>Laboratório</option>
+                                <option>Armazém</option>
+                                <option>Administrativa</option>
+                                <option>Outra</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Estado da Localização</label>
+                            <select class="form-select" name="estado">
+                                <option selected>Ativa</option>
+                                <option>Inativa</option>
+                                <option>Em obras</option>
+                                <option>Indisponível</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Capacidade estimada de equipamentos</label>
+                            <input 
+                                type="number" 
+                                class="form-control" 
+                                name="capacidade_equipamentos" 
+                                value="10"
+                                min="0"
+                                max="200"
+                            >
+                            <div class="form-text">Valor entre 0 e 200.</div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Equipamentos associados</label>
+                            <input 
+                                type="number" 
+                                class="form-control" 
+                                name="equipamentos_associados" 
+                                value="3"
+                                min="0"
+                                readonly
+                            >
+                            <div class="form-text">Campo informativo.</div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Acesso restrito</label>
+                            <select class="form-select" name="acesso_restrito">
+                                <option selected>Sim</option>
+                                <option>Não</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Prioridade técnica</label>
+                            <select class="form-select" name="prioridade_tecnica">
+                                <option>Normal</option>
+                                <option selected>Alta</option>
+                                <option>Crítica</option>
+                            </select>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Observações -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white fw-bold text-primary">
+                    <i class="fa-solid fa-clipboard me-2"></i>3. Observações
+                </div>
+
+                <div class="card-body">
+                    <label class="form-label fw-bold">Descrição / Observações</label>
+                    <textarea 
+                        class="form-control" 
+                        name="observacoes" 
+                        rows="4"
+                        maxlength="500"
+                        placeholder="Informações adicionais sobre o espaço, acessibilidade, equipamentos permitidos ou estado da sala..."
+                    >Zona de alta esterilização.</textarea>
+                    <div class="form-text">Máximo de 500 caracteres.</div>
+                </div>
+            </div>
+
+            <!-- Botões -->
+            <div class="d-flex justify-content-between align-items-center mt-4">
+
+                <div>
+                    <a href="localizacoes.html" class="btn btn-secondary me-2">
+                        Cancelar
+                    </a>
+
+                    <button type="reset" class="btn btn-outline-warning me-2">
+                        <i class="fa-solid fa-rotate-left me-2"></i>Repor Dados
+                    </button>
+
+                    <button type="submit" class="btn btn-warning px-4 text-white">
+                        <i class="fa-solid fa-floppy-disk me-2"></i>Guardar Alterações
+                    </button>
+                </div>
+            </div>
+
+        </form>
+
+    </div>
+
         </main>
 </div>
     
