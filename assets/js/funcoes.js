@@ -118,4 +118,90 @@ document.addEventListener("DOMContentLoaded", function () {
     filtroCategoria.addEventListener("change", filtrarEquipamentos);
     filtroEstado.addEventListener("change", filtrarEquipamentos);
     filtroCriticidade.addEventListener("change", filtrarEquipamentos);
+    
 });
+// Formulário por passos - Novo Equipamento
+const formNovoEquipamento = document.getElementById("formNovoEquipamento");
+const passosFormulario = document.querySelectorAll(".passo-formulario");
+const botoesPassos = document.querySelectorAll("[data-passo]");
+const btnAnterior = document.getElementById("btnAnterior");
+const btnSeguinte = document.getElementById("btnSeguinte");
+const btnGuardar = document.getElementById("btnGuardar");
+
+if (formNovoEquipamento && passosFormulario.length > 0) {
+    let passoAtual = 1;
+
+    function mostrarPasso(numeroPasso) {
+        passosFormulario.forEach(function(passo) {
+            passo.classList.add("d-none");
+        });
+
+        document.getElementById("passo" + numeroPasso).classList.remove("d-none");
+
+        botoesPassos.forEach(function(botao) {
+            botao.classList.remove("active");
+            if (parseInt(botao.getAttribute("data-passo")) === numeroPasso) {
+                botao.classList.add("active");
+            }
+        });
+
+        btnAnterior.disabled = numeroPasso === 1;
+
+        if (numeroPasso === passosFormulario.length) {
+            btnSeguinte.classList.add("d-none");
+            btnGuardar.classList.remove("d-none");
+        } else {
+            btnSeguinte.classList.remove("d-none");
+            btnGuardar.classList.add("d-none");
+        }
+    }
+
+    function validarPassoAtual() {
+        const passoVisivel = document.getElementById("passo" + passoAtual);
+        const campos = passoVisivel.querySelectorAll("input, select, textarea");
+
+        for (let campo of campos) {
+            if (!campo.checkValidity()) {
+                campo.reportValidity();
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    btnSeguinte.addEventListener("click", function() {
+        if (validarPassoAtual() && passoAtual < passosFormulario.length) {
+            passoAtual++;
+            mostrarPasso(passoAtual);
+        }
+    });
+
+    btnAnterior.addEventListener("click", function() {
+        if (passoAtual > 1) {
+            passoAtual--;
+            mostrarPasso(passoAtual);
+        }
+    });
+
+    botoesPassos.forEach(function(botao) {
+        botao.addEventListener("click", function() {
+            const passoDestino = parseInt(this.getAttribute("data-passo"));
+
+            if (passoDestino < passoAtual || validarPassoAtual()) {
+                passoAtual = passoDestino;
+                mostrarPasso(passoAtual);
+            }
+        });
+    });
+
+    formNovoEquipamento.addEventListener("submit", function(event) {
+        if (!formNovoEquipamento.checkValidity()) {
+            event.preventDefault();
+            formNovoEquipamento.reportValidity();
+        }
+    });
+
+    mostrarPasso(passoAtual);
+}
+
