@@ -78,6 +78,58 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 });
 document.addEventListener("DOMContentLoaded", function () {
+    // =====================================================
+// 8. FILTROS DA PÁGINA LOCALIZAÇÕES
+// =====================================================
+
+const pesquisaLocalizacao = document.getElementById("pesquisaLocalizacao");
+const filtroEdificio = document.getElementById("filtroEdificio");
+const filtroPiso = document.getElementById("filtroPiso");
+const filtroServico = document.getElementById("filtroServico");
+const linhasLocalizacoes = document.querySelectorAll("#tabelaLocalizacoes tbody tr");
+
+if (
+    pesquisaLocalizacao &&
+    filtroEdificio &&
+    filtroPiso &&
+    filtroServico &&
+    linhasLocalizacoes.length > 0
+) {
+    function filtrarLocalizacoes() {
+        const textoPesquisa = pesquisaLocalizacao.value.toLowerCase();
+        const edificioSelecionado = filtroEdificio.value;
+        const pisoSelecionado = filtroPiso.value;
+        const servicoSelecionado = filtroServico.value;
+
+        linhasLocalizacoes.forEach(function(linha) {
+            const textoLinha = linha.innerText.toLowerCase();
+            const edificioLinha = linha.getAttribute("data-edificio");
+            const pisoLinha = linha.getAttribute("data-piso");
+            const servicoLinha = linha.getAttribute("data-servico");
+
+            const correspondePesquisa = textoLinha.includes(textoPesquisa);
+            const correspondeEdificio = edificioSelecionado === "" || edificioLinha === edificioSelecionado;
+            const correspondePiso = pisoSelecionado === "" || pisoLinha === pisoSelecionado;
+            const correspondeServico = servicoSelecionado === "" || servicoLinha === servicoSelecionado;
+
+            if (
+                correspondePesquisa &&
+                correspondeEdificio &&
+                correspondePiso &&
+                correspondeServico
+            ) {
+                linha.style.display = "";
+            } else {
+                linha.style.display = "none";
+            }
+        });
+    }
+
+    pesquisaLocalizacao.addEventListener("input", filtrarLocalizacoes);
+    filtroEdificio.addEventListener("change", filtrarLocalizacoes);
+    filtroPiso.addEventListener("change", filtrarLocalizacoes);
+    filtroServico.addEventListener("change", filtrarLocalizacoes);
+}
 // =====================================================
 // 6. FORMULÁRIO POR PASSOS - NOVO FORNECEDOR
 // =====================================================

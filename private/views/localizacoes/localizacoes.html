@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SanoGest | Painel de Administração</title>
+    <title>SanoGest | Localizações</title>
      <link rel="stylesheet" href="../../../assets/css/bootstrap.min.css">
     <link rel="stylesheet" href="../../../assets/css/1240881.css">
     <link rel="stylesheet" href="../../../assets/fontawesome/all.min.css">
@@ -69,52 +69,229 @@
                 <li><a href="../documentacao/documentacao.html" class="nav-link text-dark"><i class="fa-solid fa-file-contract me-2"></i>Documentação</a></li>
                 
             </ul>
-            </ul>
         </div>
     </nav>
 
     <main class="p-5 fundo-dashboard conteudo-principal">
-        <div class="bg-white bg-opacity-75 p-5 rounded shadow-sm"> 
-           <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>Localizações</h2>
-            <a href="novo.html" class="btn btn-primary">
-            <i class="fa-solid fa-plus me-2"></i>Nova Localização
-            </a>
-           </div>
+       <div class="bg-white bg-opacity-75 p-5 rounded shadow-sm">
 
-       <div class="table-responsive">
-        <table class="table table-hover align-middle">
-            <thead class="table-light">
-                <tr>
-                    <th>Edifício</th>
-                    <th>Piso</th>
-                    <th>Serviço</th>
-                    <th>Sala/Gabinete</th>
-                    <th>Equipamentos</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Edifício A</td>
-                    <td>Piso 1</td>
-                    <td>Bloco Operatório</td>
-                    <td>Sala 04</td>
-                    <td><span class="badge bg-secondary">3 Equipamentos</span></td>
-                    <td>
-                        <a href="detalhes.html" class="btn btn-sm btn-outline-info" title="Ver Equipamentos"><i class="fa-solid fa-eye"></i></a>
-                        <a href="editar.html" class="btn btn-sm btn-outline-warning" title="Editar"><i class="fa-solid fa-pen"></i></a>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-       </div>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="text-primary fw-bold mb-1">
+                    <i class="fa-solid fa-map-location-dot me-2"></i>Localizações
+                </h2>
+                <p class="text-muted mb-0">
+                    Gestão das localizações físicas dos equipamentos médicos por edifício, piso, serviço e sala.
+                </p>
+            </div>
+
+            <a href="novo.html" class="btn btn-primary">
+                <i class="fa-solid fa-plus me-2"></i>Nova Localização
+            </a>
+        </div>
+
+
+        <!-- Pesquisa e filtros -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white fw-bold">
+                <i class="fa-solid fa-filter me-2 text-primary"></i>Pesquisa e Filtros
+            </div>
+
+            <div class="card-body">
+                <div class="row g-3">
+
+                    <div class="col-md-5">
+                        <label for="pesquisaLocalizacao" class="form-label fw-bold">Pesquisar</label>
+                        <input 
+                            type="text" 
+                            id="pesquisaLocalizacao" 
+                            class="form-control" 
+                            placeholder="Pesquisar por edifício, piso, serviço ou sala..."
+                        >
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="filtroEdificio" class="form-label fw-bold">Edifício</label>
+                        <select id="filtroEdificio" class="form-select">
+                            <option value="">Todos</option>
+                            <option value="Edifício A">Edifício A</option>
+                            <option value="Edifício B">Edifício B</option>
+                            <option value="Edifício C">Edifício C</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label for="filtroPiso" class="form-label fw-bold">Piso</label>
+                        <select id="filtroPiso" class="form-select">
+                            <option value="">Todos</option>
+                            <option value="Piso 0">Piso 0</option>
+                            <option value="Piso 1">Piso 1</option>
+                            <option value="Piso 2">Piso 2</option>
+                            <option value="Piso 3">Piso 3</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label for="filtroServico" class="form-label fw-bold">Serviço</label>
+                        <select id="filtroServico" class="form-select">
+                            <option value="">Todos</option>
+                            <option value="Bloco Operatório">Bloco Operatório</option>
+                            <option value="Urgência">Urgência</option>
+                            <option value="UCI">UCI</option>
+                            <option value="Radiologia">Radiologia</option>
+                            <option value="Laboratório">Laboratório</option>
+                        </select>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabela -->
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <span class="fw-bold">
+                    <i class="fa-solid fa-list me-2 text-primary"></i>Lista de Localizações
+                </span>
+                <small class="text-muted">Localização física atual dos equipamentos hospitalares</small>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" id="tabelaLocalizacoes">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Edifício</th>
+                            <th>Piso</th>
+                            <th>Serviço</th>
+                            <th>Sala/Gabinete</th>
+                            <th>Tipo de Área</th>
+                            <th>Equipamentos</th>
+                            <th>Estado</th>
+                            <th class="text-end">Ações</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr data-edificio="Edifício A" data-piso="Piso 1" data-servico="Bloco Operatório">
+                            <td class="fw-bold">Edifício A</td>
+                            <td>Piso 1</td>
+                            <td>Bloco Operatório</td>
+                            <td>Sala 04</td>
+                            <td><span class="badge bg-danger">Área Crítica</span></td>
+                            <td><span class="badge bg-secondary">3 Equipamentos</span></td>
+                            <td><span class="badge bg-success">Ativa</span></td>
+                            <td class="text-end">
+                                <a href="detalhes.html" class="btn btn-sm btn-outline-info" title="Ver Equipamentos">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+                                <a href="editar.html" class="btn btn-sm btn-outline-warning" title="Editar">
+                                    <i class="fa-solid fa-pen"></i>
+                                </a>
+                                <a href="apagar.html" class="btn btn-sm btn-outline-danger" title="Remover">
+                                    <i class="fa-solid fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+
+                        <tr data-edificio="Edifício A" data-piso="Piso 0" data-servico="Urgência">
+                            <td class="fw-bold">Edifício A</td>
+                            <td>Piso 0</td>
+                            <td>Urgência</td>
+                            <td>Sala de Reanimação</td>
+                            <td><span class="badge bg-danger">Área Crítica</span></td>
+                            <td><span class="badge bg-secondary">5 Equipamentos</span></td>
+                            <td><span class="badge bg-success">Ativa</span></td>
+                            <td class="text-end">
+                                <a href="detalhes.html" class="btn btn-sm btn-outline-info" title="Ver Equipamentos">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+                                <a href="editar.html" class="btn btn-sm btn-outline-warning" title="Editar">
+                                    <i class="fa-solid fa-pen"></i>
+                                </a>
+                                <a href="apagar.html" class="btn btn-sm btn-outline-danger" title="Remover">
+                                    <i class="fa-solid fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+
+                        <tr data-edificio="Edifício B" data-piso="Piso 2" data-servico="UCI">
+                            <td class="fw-bold">Edifício B</td>
+                            <td>Piso 2</td>
+                            <td>UCI</td>
+                            <td>Box 03</td>
+                            <td><span class="badge bg-danger">Área Crítica</span></td>
+                            <td><span class="badge bg-secondary">8 Equipamentos</span></td>
+                            <td><span class="badge bg-success">Ativa</span></td>
+                            <td class="text-end">
+                                <a href="detalhes.html" class="btn btn-sm btn-outline-info" title="Ver Equipamentos">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+                                <a href="editar.html" class="btn btn-sm btn-outline-warning" title="Editar">
+                                    <i class="fa-solid fa-pen"></i>
+                                </a>
+                                <a href="apagar.html" class="btn btn-sm btn-outline-danger" title="Remover">
+                                    <i class="fa-solid fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+
+                        <tr data-edificio="Edifício B" data-piso="Piso 1" data-servico="Radiologia">
+                            <td class="fw-bold">Edifício B</td>
+                            <td>Piso 1</td>
+                            <td>Radiologia</td>
+                            <td>Sala RX 02</td>
+                            <td><span class="badge bg-primary">Diagnóstico</span></td>
+                            <td><span class="badge bg-secondary">4 Equipamentos</span></td>
+                            <td><span class="badge bg-success">Ativa</span></td>
+                            <td class="text-end">
+                                <a href="detalhes.html" class="btn btn-sm btn-outline-info" title="Ver Equipamentos">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+                                <a href="editar.html" class="btn btn-sm btn-outline-warning" title="Editar">
+                                    <i class="fa-solid fa-pen"></i>
+                                </a>
+                                <a href="apagar.html" class="btn btn-sm btn-outline-danger" title="Remover">
+                                    <i class="fa-solid fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+
+                        <tr data-edificio="Edifício C" data-piso="Piso 3" data-servico="Laboratório">
+                            <td class="fw-bold">Edifício C</td>
+                            <td>Piso 3</td>
+                            <td>Laboratório</td>
+                            <td>Lab. Central</td>
+                            <td><span class="badge bg-info text-dark">Laboratório</span></td>
+                            <td><span class="badge bg-secondary">4 Equipamentos</span></td>
+                            <td><span class="badge bg-success">Ativa</span></td>
+                            <td class="text-end">
+                                <a href="detalhes.html" class="btn btn-sm btn-outline-info" title="Ver Equipamentos">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+                                <a href="editar.html" class="btn btn-sm btn-outline-warning" title="Editar">
+                                    <i class="fa-solid fa-pen"></i>
+                                </a>
+                                <a href="apagar.html" class="btn btn-sm btn-outline-danger" title="Remover">
+                                    <i class="fa-solid fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card-footer bg-white text-muted small">
+                Use a pesquisa ou os filtros para localizar rapidamente equipamentos por edifício, piso, serviço ou sala.
+            </div>
+        </div>
+
     </div>
         
         </main>
 </div>
     
     <script src="../../../assets/js/bootstrap.bundle.min.js"></script>
+    <script src="../../../assets/js/funcoes.js"></script>
     
 </body>
 </html>
