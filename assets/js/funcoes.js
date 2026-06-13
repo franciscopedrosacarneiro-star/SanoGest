@@ -78,6 +78,111 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 });
 document.addEventListener("DOMContentLoaded", function () {
+// =====================================================
+// 9. FILTROS DA PÁGINA GARANTIAS
+// =====================================================
+
+const pesquisaGarantia = document.getElementById("pesquisaGarantia");
+const filtroEstadoGarantia = document.getElementById("filtroEstadoGarantia");
+const filtroTipoContrato = document.getElementById("filtroTipoContrato");
+const filtroCriticidadeGarantia = document.getElementById("filtroCriticidadeGarantia");
+const linhasGarantias = document.querySelectorAll("#tabelaGarantias tbody tr");
+
+if (
+    pesquisaGarantia &&
+    filtroEstadoGarantia &&
+    filtroTipoContrato &&
+    filtroCriticidadeGarantia &&
+    linhasGarantias.length > 0
+) {
+    function filtrarGarantias() {
+        const textoPesquisa = pesquisaGarantia.value.toLowerCase();
+        const estadoSelecionado = filtroEstadoGarantia.value;
+        const tipoSelecionado = filtroTipoContrato.value;
+        const criticidadeSelecionada = filtroCriticidadeGarantia.value;
+
+        linhasGarantias.forEach(function(linha) {
+            const textoLinha = linha.innerText.toLowerCase();
+            const estadoLinha = linha.getAttribute("data-estado");
+            const tipoLinha = linha.getAttribute("data-tipo");
+            const criticidadeLinha = linha.getAttribute("data-criticidade");
+
+            const correspondePesquisa = textoLinha.includes(textoPesquisa);
+            const correspondeEstado = estadoSelecionado === "" || estadoLinha === estadoSelecionado;
+            const correspondeTipo = tipoSelecionado === "" || tipoLinha === tipoSelecionado;
+            const correspondeCriticidade = criticidadeSelecionada === "" || criticidadeLinha === criticidadeSelecionada;
+
+            if (
+                correspondePesquisa &&
+                correspondeEstado &&
+                correspondeTipo &&
+                correspondeCriticidade
+            ) {
+                linha.style.display = "";
+            } else {
+                linha.style.display = "none";
+            }
+        });
+    }
+
+    pesquisaGarantia.addEventListener("input", filtrarGarantias);
+    filtroEstadoGarantia.addEventListener("change", filtrarGarantias);
+    filtroTipoContrato.addEventListener("change", filtrarGarantias);
+    filtroCriticidadeGarantia.addEventListener("change", filtrarGarantias);
+}
+  
+// =====================================================
+// 8. FILTROS DA PÁGINA LOCALIZAÇÕES
+// =====================================================
+
+const pesquisaLocalizacao = document.getElementById("pesquisaLocalizacao");
+const filtroEdificio = document.getElementById("filtroEdificio");
+const filtroPiso = document.getElementById("filtroPiso");
+const filtroServico = document.getElementById("filtroServico");
+const linhasLocalizacoes = document.querySelectorAll("#tabelaLocalizacoes tbody tr");
+
+if (
+    pesquisaLocalizacao &&
+    filtroEdificio &&
+    filtroPiso &&
+    filtroServico &&
+    linhasLocalizacoes.length > 0
+) {
+    function filtrarLocalizacoes() {
+        const textoPesquisa = pesquisaLocalizacao.value.toLowerCase();
+        const edificioSelecionado = filtroEdificio.value;
+        const pisoSelecionado = filtroPiso.value;
+        const servicoSelecionado = filtroServico.value;
+
+        linhasLocalizacoes.forEach(function(linha) {
+            const textoLinha = linha.innerText.toLowerCase();
+            const edificioLinha = linha.getAttribute("data-edificio");
+            const pisoLinha = linha.getAttribute("data-piso");
+            const servicoLinha = linha.getAttribute("data-servico");
+
+            const correspondePesquisa = textoLinha.includes(textoPesquisa);
+            const correspondeEdificio = edificioSelecionado === "" || edificioLinha === edificioSelecionado;
+            const correspondePiso = pisoSelecionado === "" || pisoLinha === pisoSelecionado;
+            const correspondeServico = servicoSelecionado === "" || servicoLinha === servicoSelecionado;
+
+            if (
+                correspondePesquisa &&
+                correspondeEdificio &&
+                correspondePiso &&
+                correspondeServico
+            ) {
+                linha.style.display = "";
+            } else {
+                linha.style.display = "none";
+            }
+        });
+    }
+
+    pesquisaLocalizacao.addEventListener("input", filtrarLocalizacoes);
+    filtroEdificio.addEventListener("change", filtrarLocalizacoes);
+    filtroPiso.addEventListener("change", filtrarLocalizacoes);
+    filtroServico.addEventListener("change", filtrarLocalizacoes);
+}
     // =====================================================
 // 8. FILTROS DA PÁGINA LOCALIZAÇÕES
 // =====================================================
