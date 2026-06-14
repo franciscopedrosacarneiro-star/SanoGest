@@ -79,6 +79,58 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 document.addEventListener("DOMContentLoaded", function () {
+// =====================================================
+// FILTROS DA PÁGINA DOCUMENTAÇÃO
+// =====================================================
+
+const pesquisaDocumento = document.getElementById("pesquisaDocumento");
+const filtroTipoDocumento = document.getElementById("filtroTipoDocumento");
+const filtroEstadoDocumento = document.getElementById("filtroEstadoDocumento");
+const filtroAssociacaoDocumento = document.getElementById("filtroAssociacaoDocumento");
+const linhasDocumentos = document.querySelectorAll("#tabelaDocumentos tbody tr");
+
+if (
+    pesquisaDocumento &&
+    filtroTipoDocumento &&
+    filtroEstadoDocumento &&
+    filtroAssociacaoDocumento &&
+    linhasDocumentos.length > 0
+) {
+    function filtrarDocumentos() {
+        const textoPesquisa = pesquisaDocumento.value.toLowerCase().trim();
+        const tipoSelecionado = filtroTipoDocumento.value;
+        const estadoSelecionado = filtroEstadoDocumento.value;
+        const associacaoSelecionada = filtroAssociacaoDocumento.value;
+
+        linhasDocumentos.forEach(function(linha) {
+            const textoLinha = linha.innerText.toLowerCase();
+            const tipoLinha = linha.getAttribute("data-tipo");
+            const estadoLinha = linha.getAttribute("data-estado");
+            const associacaoLinha = linha.getAttribute("data-associacao");
+
+            const correspondePesquisa = textoLinha.includes(textoPesquisa);
+            const correspondeTipo = tipoSelecionado === "" || tipoLinha === tipoSelecionado;
+            const correspondeEstado = estadoSelecionado === "" || estadoLinha === estadoSelecionado;
+            const correspondeAssociacao = associacaoSelecionada === "" || associacaoLinha === associacaoSelecionada;
+
+            if (
+                correspondePesquisa &&
+                correspondeTipo &&
+                correspondeEstado &&
+                correspondeAssociacao
+            ) {
+                linha.style.display = "";
+            } else {
+                linha.style.display = "none";
+            }
+        });
+    }
+
+    pesquisaDocumento.addEventListener("input", filtrarDocumentos);
+    filtroTipoDocumento.addEventListener("change", filtrarDocumentos);
+    filtroEstadoDocumento.addEventListener("change", filtrarDocumentos);
+    filtroAssociacaoDocumento.addEventListener("change", filtrarDocumentos);
+}
 
     // =====================================================
     // 1. GRÁFICOS DO DASHBOARD
