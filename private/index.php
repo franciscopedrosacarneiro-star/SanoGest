@@ -50,8 +50,8 @@ redirect_if_not_logged();
                         </li>
                         <li><hr class="dropdown-divider"></li>
                         <li>
-                            <a class="dropdown-item py-2 text-danger" href="../public/index.html">
-                                <i class="fa-solid fa-right-from-bracket me-2"></i>Sair
+                           <a class="dropdown-item py-2 text-danger" href="/SanoGest/private/logout.php">
+                              <i class="fa-solid fa-right-from-bracket me-2"></i>Sair
                             </a>
                         </li>
                     </ul>
