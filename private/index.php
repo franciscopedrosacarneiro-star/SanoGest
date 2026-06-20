@@ -21,7 +21,7 @@ redirect_if_not_logged();
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top" style="z-index: 1030 !important; padding-left: 0px !important; padding-right: 0px !important;">
     <div style="width: 100% !important; display: flex !important; align-items: center !important; justify-content: space-between !important; padding-left: 5px !important; padding-right: 20px !important;">
         
-        <a class="navbar-brand fw-bold" href="../private/index.html" style="margin-left: 10px !important; display: flex !important; align-items: center !important;">
+        <a class="navbar-brand fw-bold" href="../private/index.php" style="margin-left: 10px !important; display: flex !important; align-items: center !important;">
             <img src="../assets/img/logo 255.png" alt="Logo SanoGest" style="height: 35px;" class="me-2">
             SanoGest Admin
         </a>
