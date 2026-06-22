@@ -530,7 +530,7 @@ redirect_if_not_logged();
 </div>
     
     <script src="../../../assets/js/bootstrap.bundle.min.js"></script>
-    <script src="../../../assets/js/funcoes.js"></script>
+    <script src="../../../assets/js/1240881.js"></script>
     
 </body>
 </html>

@@ -66,12 +66,12 @@ redirect_if_not_logged();
     <nav class="bg-white border-end shadow-sm sidebar-fixa">
         <div class="p-3">
             <ul class="nav nav-pills flex-column mb-auto">
-                <li><a href="../private/views/dashboard/dashboard.html" class="nav-link text-dark"><i class="fa-solid fa-gauge me-2"></i>Dashboard</a></li>
-                <li><a href="../private/views/equipamentos/equipamentos.html" class="nav-link text-dark"><i class="fa-solid fa-microchip me-2"></i>Equipamentos</a></li>
-                <li><a href="../private/views/fornecedores/fornecedores.html" class="nav-link text-dark"><i class="fa-solid fa-truck-medical me-2"></i>Fornecedores</a></li>
-                <li><a href="../private/views/localizacoes/localizacoes.html" class="nav-link text-dark"><i class="fa-solid fa-map-location-dot me-2"></i>Localizações</a></li>
-                <li><a href="../private/views/garantias/garantias.html" class="nav-link text-dark"><i class="fa-solid fa-shield-halved me-2"></i>Garantias</a></li>
-                <li><a href="../private/views/documentacao/documentacao.html" class="nav-link text-dark"><i class="fa-solid fa-file-contract me-2"></i>Documentação</a></li>
+                <li><a href="../private/views/dashboard/dashboard.php" class="nav-link text-dark"><i class="fa-solid fa-gauge me-2"></i>Dashboard</a></li>
+                <li><a href="../private/views/equipamentos/equipamentos.php" class="nav-link text-dark"><i class="fa-solid fa-microchip me-2"></i>Equipamentos</a></li>
+                <li><a href="../private/views/fornecedores/fornecedores.php" class="nav-link text-dark"><i class="fa-solid fa-truck-medical me-2"></i>Fornecedores</a></li>
+                <li><a href="../private/views/localizacoes/localizacoes.php" class="nav-link text-dark"><i class="fa-solid fa-map-location-dot me-2"></i>Localizações</a></li>
+                <li><a href="../private/views/garantias/garantias.php" class="nav-link text-dark"><i class="fa-solid fa-shield-halved me-2"></i>Garantias</a></li>
+                <li><a href="../private/views/documentacao/documentacao.php" class="nav-link text-dark"><i class="fa-solid fa-file-contract me-2"></i>Documentação</a></li>
                 <li>
                     <a href="../private/views/editar/editar-index.html" class="nav-link active">
                         <i class="fa-solid fa-pen-to-square me-2"></i>Editar Página Pública
@@ -155,16 +155,16 @@ redirect_if_not_logged();
                         Acesso Rápido
                     </div>
                     <div class="card-body d-grid gap-2">
-                        <a href="../private/views/equipamentos/equipamentos.html" class="btn btn-outline-primary">
+                        <a href="../private/views/equipamentos/equipamentos.php" class="btn btn-outline-primary">
                             <i class="fa-solid fa-microchip me-2"></i>Ver Equipamentos
                         </a>
-                        <a href="../private/views/fornecedores/fornecedores.html" class="btn btn-outline-primary">
+                        <a href="../private/views/fornecedores/fornecedores.php" class="btn btn-outline-primary">
                             <i class="fa-solid fa-truck-medical me-2"></i>Ver Fornecedores
                         </a>
-                        <a href="../private/views/documentacao/documentacao.html" class="btn btn-outline-primary">
+                        <a href="../private/views/documentacao/documentacao.php" class="btn btn-outline-primary">
                             <i class="fa-solid fa-file-contract me-2"></i>Ver Documentação
                         </a>
-                        <a href="../private/views/garantias/garantias.html" class="btn btn-outline-primary">
+                        <a href="../private/views/garantias/garantias.php" class="btn btn-outline-primary">
                             <i class="fa-solid fa-shield-halved me-2"></i>Ver Garantias
                         </a>
                     </div>
@@ -198,7 +198,7 @@ redirect_if_not_logged();
                             <td><span class="badge bg-success">Ativo</span></td>
                             <td><span class="badge bg-danger">Suporte de Vida</span></td>
                             <td class="text-end">
-                                <a href="../private/views/equipamentos/consultar.html" class="btn btn-sm btn-outline-primary">
+                                <a href="../private/views/equipamentos/consultar.php" class="btn btn-sm btn-outline-primary">
                                     Consultar
                                 </a>
                             </td>
