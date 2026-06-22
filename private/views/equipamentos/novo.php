@@ -1,10 +1,111 @@
 <?php
 
 require_once __DIR__ . '/../../includes/funcoes.php';
+require_once __DIR__ . '/../../includes/database.php';
 
 redirect_if_not_logged();
 
+$erro = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $codigo_inventario = limpar_texto($_POST['codigo_inventario'] ?? '');
+    $designacao = limpar_texto($_POST['designacao'] ?? '');
+    $categoria = limpar_texto($_POST['categoria'] ?? '');
+    $marca = limpar_texto($_POST['marca'] ?? '');
+    $modelo = limpar_texto($_POST['modelo'] ?? '');
+    $num_serie = limpar_texto($_POST['num_serie'] ?? '');
+    $fabricante = limpar_texto($_POST['fabricante'] ?? '');
+
+    $data_aquisicao = $_POST['data_aquisicao'] ?? '';
+    $ano_fabrico = $_POST['ano_fabrico'] ?? '';
+    $custo = $_POST['custo'] ?? '';
+    $tipo_entrada = limpar_texto($_POST['tipo_entrada'] ?? '');
+    $estado = limpar_texto($_POST['estado'] ?? '');
+    $criticidade = limpar_texto($_POST['criticidade'] ?? '');
+
+    $edificio = limpar_texto($_POST['edificio'] ?? '');
+    $piso = $_POST['piso'] ?? '';
+    $servico = limpar_texto($_POST['servico'] ?? '');
+    $sala = limpar_texto($_POST['sala'] ?? '');
+
+    $observacoes = limpar_texto($_POST['observacoes'] ?? '');
+
+    if (
+        empty($codigo_inventario) ||
+        empty($designacao) ||
+        empty($categoria) ||
+        empty($marca) ||
+        empty($modelo) ||
+        empty($num_serie) ||
+        empty($fabricante) ||
+        empty($data_aquisicao) ||
+        empty($ano_fabrico) ||
+        empty($custo) ||
+        empty($tipo_entrada) ||
+        empty($estado) ||
+        empty($criticidade) ||
+        empty($edificio) ||
+        empty($piso) ||
+        empty($servico) ||
+        empty($sala)
+    ) {
+        $erro = 'Preenche todos os campos obrigatórios.';
+    } else {
+        try {
+            $pdo->beginTransaction();
+
+            $sqlLocalizacao = "INSERT INTO localizacoes
+                (edificio, piso, servico, sala, tipo_area, estado, capacidade_equipamentos, acesso_restrito, prioridade_tecnica, observacoes)
+                VALUES
+                (:edificio, :piso, :servico, :sala, 'Outra', 'Ativa', 1, 'Não', 'Normal', 'Criada automaticamente no registo de equipamento')";
+
+            $stmtLocalizacao = $pdo->prepare($sqlLocalizacao);
+            $stmtLocalizacao->bindValue(':edificio', $edificio);
+            $stmtLocalizacao->bindValue(':piso', $piso);
+            $stmtLocalizacao->bindValue(':servico', $servico);
+            $stmtLocalizacao->bindValue(':sala', $sala);
+            $stmtLocalizacao->execute();
+
+            $id_localizacao = $pdo->lastInsertId();
+
+            $sqlEquipamento = "INSERT INTO equipamentos
+                (codigo_inventario, designacao, categoria, marca, modelo, num_serie, fabricante, data_aquisicao, ano_fabrico, custo, tipo_entrada, estado, criticidade, id_localizacao, observacoes)
+                VALUES
+                (:codigo_inventario, :designacao, :categoria, :marca, :modelo, :num_serie, :fabricante, :data_aquisicao, :ano_fabrico, :custo, :tipo_entrada, :estado, :criticidade, :id_localizacao, :observacoes)";
+
+            $stmtEquipamento = $pdo->prepare($sqlEquipamento);
+            $stmtEquipamento->bindValue(':codigo_inventario', $codigo_inventario);
+            $stmtEquipamento->bindValue(':designacao', $designacao);
+            $stmtEquipamento->bindValue(':categoria', $categoria);
+            $stmtEquipamento->bindValue(':marca', $marca);
+            $stmtEquipamento->bindValue(':modelo', $modelo);
+            $stmtEquipamento->bindValue(':num_serie', $num_serie);
+            $stmtEquipamento->bindValue(':fabricante', $fabricante);
+            $stmtEquipamento->bindValue(':data_aquisicao', $data_aquisicao);
+            $stmtEquipamento->bindValue(':ano_fabrico', $ano_fabrico);
+            $stmtEquipamento->bindValue(':custo', $custo);
+            $stmtEquipamento->bindValue(':tipo_entrada', $tipo_entrada);
+            $stmtEquipamento->bindValue(':estado', $estado);
+            $stmtEquipamento->bindValue(':criticidade', $criticidade);
+            $stmtEquipamento->bindValue(':id_localizacao', $id_localizacao);
+            $stmtEquipamento->bindValue(':observacoes', $observacoes);
+            $stmtEquipamento->execute();
+
+            $id_equipamento = $pdo->lastInsertId();
+
+            $pdo->commit();
+
+            header('Location: consultar.php?id_equipamento=' . $id_equipamento);
+            exit;
+        } catch (PDOException $e) {
+            $pdo->rollBack();
+            $erro = 'Erro ao guardar o equipamento. Verifica se o código interno ou o número de série já existem.';
+        }
+    }
+}
+
 ?>
+
 <!DOCTYPE html>
 <html lang="pt-pt">
 <head>
@@ -46,7 +147,7 @@ redirect_if_not_logged();
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2" aria-labelledby="menuUtilizador">
                         <li>
-                            <a class="dropdown-item py-2" href="../../../private/views/perfil/alterar-senha.html">
+                            <a class="dropdown-item py-2" href="../../../private/views/perfil/alterar-senha.php">
                                 <i class="fa-solid fa-key me-2 text-muted"></i>Trocar palavra-passe
                             </a>
                         </li>
@@ -69,7 +170,7 @@ redirect_if_not_logged();
         <div class="p-3">
             
             <ul class="nav nav-pills flex-column mb-auto">
-                <li><a href="../equipamentos/equipamentos.html" class="nav-link text-dark"><i class="fa-solid fa-microchip me-2"></i>Equipamentos</a></li>
+                <li><a href="../equipamentos/equipamentos.php" class="nav-link text-dark"><i class="fa-solid fa-microchip me-2"></i>Equipamentos</a></li>
             </ul>
         </div>
     </nav>
@@ -92,7 +193,13 @@ redirect_if_not_logged();
             </a>
         </div>
 
-        <form id="formNovoEquipamento" action="equipamentos.html" method="post">
+        <form id="formNovoEquipamento" action="#" method="post" novalidate>
+            <?php if (!empty($erro)): ?>
+    <div class="alert alert-danger">
+        <i class="fa-solid fa-circle-exclamation me-2"></i>
+        <?= htmlspecialchars($erro) ?>
+    </div>
+         <?php endif; ?>
 
             <!-- Indicador dos passos -->
             <ul class="nav nav-pills nav-fill mb-4">
@@ -508,7 +615,7 @@ redirect_if_not_logged();
                 </button>
 
                 <div>
-                    <a href="../equipamentos/equipamentos.html" class="btn btn-secondary me-2">
+                    <a href="../equipamentos/equipamentos.php" class="btn btn-secondary me-2">
                         Cancelar
                     </a>
 

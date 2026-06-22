@@ -201,30 +201,43 @@ function selecionado($valor_atual, $valor_opcao)
         <div class="p-3">
             <h5 class="text-primary fw-bold mb-4">Módulos</h5>
             <ul class="nav nav-pills flex-column mb-auto">
-                <li><a href="../equipamentos/equipamentos.html" class="nav-link text-dark"><i class="fa-solid fa-microchip me-2"></i>Equipamentos</a></li>
+                <li><a href="../equipamentos/equipamentos.php" class="nav-link text-dark"><i class="fa-solid fa-microchip me-2"></i>Equipamentos</a></li>
             </ul>
         </div>
     </nav>
 
     <main class="p-5 fundo-dashboard conteudo-principal">
-        <div class="bg-white bg-opacity-75 p-5 rounded shadow-sm">
+            <div class="bg-white bg-opacity-75 p-5 rounded shadow-sm">
 
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
                 <h2 class="text-warning fw-bold mb-1">
-                    <i class="fa-solid fa-pen-to-square me-2"></i>Editar Equipamento: EQP-001
+                    <i class="fa-solid fa-pen-to-square me-2"></i>
+                    Editar Equipamento: <?= htmlspecialchars($equipamento->codigo_inventario ?? '') ?>
                 </h2>
                 <p class="text-muted mb-0">
                     Atualização dos dados técnicos, administrativos e documentais do equipamento.
                 </p>
             </div>
 
-            <a href="equipamentos.html" class="btn btn-outline-secondary">
+            <a href="equipamentos.php" class="btn btn-outline-secondary">
                 <i class="fa-solid fa-arrow-left me-2"></i>Voltar
             </a>
         </div>
 
-        <form action="equipamentos.html" method="post">
+        <form 
+            action="editar.php?id_equipamento=<?= htmlspecialchars($equipamento->id_equipamento) ?>" 
+            method="post" 
+            novalidate
+        >
+            <input type="hidden" name="id_equipamento" value="<?= htmlspecialchars($equipamento->id_equipamento) ?>">
+
+            <?php if (!empty($erro)): ?>
+                <div class="alert alert-danger">
+                    <i class="fa-solid fa-circle-exclamation me-2"></i>
+                    <?= htmlspecialchars($erro) ?>
+                </div>
+            <?php endif; ?>
 
             <!-- Separadores -->
             <ul class="nav nav-tabs mb-4" id="tabsEditarEquipamento" role="tablist">
@@ -270,18 +283,16 @@ function selecionado($valor_atual, $valor_opcao)
 
                         <div class="card-body">
                             <div class="row g-3">
+
                                 <div class="col-md-3">
                                     <label class="form-label fw-bold">Código Interno *</label>
                                     <input 
                                         type="text" 
                                         class="form-control" 
                                         name="codigo_inventario" 
-                                        value="001"
-                                        pattern="[0-9]+"
-                                        title="O código deve conter apenas números."
+                                        value="<?= htmlspecialchars($equipamento->codigo_inventario ?? '') ?>"
                                         required
                                     >
-                                    <div class="form-text">Apenas números.</div>
                                 </div>
 
                                 <div class="col-md-5">
@@ -290,7 +301,7 @@ function selecionado($valor_atual, $valor_opcao)
                                         type="text" 
                                         class="form-control" 
                                         name="designacao" 
-                                        value="Ventilador Pulmonar Dräger Evita V500"
+                                        value="<?= htmlspecialchars($equipamento->designacao ?? '') ?>"
                                         minlength="3"
                                         maxlength="80"
                                         required
@@ -300,44 +311,61 @@ function selecionado($valor_atual, $valor_opcao)
                                 <div class="col-md-4">
                                     <label class="form-label fw-bold">Categoria *</label>
                                     <select class="form-select" name="categoria" required>
-                                        <option>Monitorização</option>
-                                        <option selected>Suporte de Vida</option>
-                                        <option>Terapia</option>
-                                        <option>Diagnóstico</option>
-                                        <option>Laboratório</option>
-                                        <option>Esterilização</option>
-                                        <option>Reabilitação</option>
+                                        <option value="">Selecione...</option>
+                                        <option <?= selecionado($equipamento->categoria ?? '', 'Monitorização') ?>>Monitorização</option>
+                                        <option <?= selecionado($equipamento->categoria ?? '', 'Suporte de Vida') ?>>Suporte de Vida</option>
+                                        <option <?= selecionado($equipamento->categoria ?? '', 'Terapia') ?>>Terapia</option>
+                                        <option <?= selecionado($equipamento->categoria ?? '', 'Diagnóstico') ?>>Diagnóstico</option>
+                                        <option <?= selecionado($equipamento->categoria ?? '', 'Laboratório') ?>>Laboratório</option>
+                                        <option <?= selecionado($equipamento->categoria ?? '', 'Imagem Médica') ?>>Imagem Médica</option>
+                                        <option <?= selecionado($equipamento->categoria ?? '', 'Outro') ?>>Outro</option>
                                     </select>
                                 </div>
 
                                 <div class="col-md-3">
                                     <label class="form-label fw-bold">Marca *</label>
-                                    <input type="text" class="form-control" name="marca" value="Dräger" required>
+                                    <input 
+                                        type="text" 
+                                        class="form-control" 
+                                        name="marca" 
+                                        value="<?= htmlspecialchars($equipamento->marca ?? '') ?>" 
+                                        required
+                                    >
                                 </div>
 
                                 <div class="col-md-3">
                                     <label class="form-label fw-bold">Modelo *</label>
-                                    <input type="text" class="form-control" name="modelo" value="Evita V500" required>
+                                    <input 
+                                        type="text" 
+                                        class="form-control" 
+                                        name="modelo" 
+                                        value="<?= htmlspecialchars($equipamento->modelo ?? '') ?>" 
+                                        required
+                                    >
                                 </div>
 
                                 <div class="col-md-3">
-                                    <label class="form-label fw-bold">Nº de Série *</label>
+                                    <label class="form-label fw-bold">N.º de Série *</label>
                                     <input 
                                         type="text" 
                                         class="form-control" 
                                         name="num_serie" 
-                                        value="DR-99887766"
-                                        pattern="[A-Za-z0-9\-]+"
-                                        title="Use apenas letras, números ou hífen."
+                                        value="<?= htmlspecialchars($equipamento->num_serie ?? '') ?>"
                                         required
                                     >
-                                    <div class="form-text">Letras, números ou hífen.</div>
                                 </div>
 
                                 <div class="col-md-3">
                                     <label class="form-label fw-bold">Fabricante *</label>
-                                    <input type="text" class="form-control" name="fabricante" value="Drägerwerk AG" required>
+                                    <input 
+                                        type="text" 
+                                        class="form-control" 
+                                        name="fabricante" 
+                                        value="<?= htmlspecialchars($equipamento->fabricante ?? '') ?>" 
+                                        required
+                                    >
                                 </div>
+
                             </div>
                         </div>
                     </div>
@@ -352,9 +380,16 @@ function selecionado($valor_atual, $valor_opcao)
 
                         <div class="card-body">
                             <div class="row g-3">
+
                                 <div class="col-md-3">
                                     <label class="form-label fw-bold">Data de Aquisição *</label>
-                                    <input type="date" class="form-control" name="data_aquisicao" value="2024-03-15" required>
+                                    <input 
+                                        type="date" 
+                                        class="form-control" 
+                                        name="data_aquisicao" 
+                                        value="<?= htmlspecialchars($equipamento->data_aquisicao ?? '') ?>" 
+                                        required
+                                    >
                                 </div>
 
                                 <div class="col-md-3">
@@ -363,7 +398,7 @@ function selecionado($valor_atual, $valor_opcao)
                                         type="number" 
                                         class="form-control" 
                                         name="ano_fabrico" 
-                                        value="2024"
+                                        value="<?= htmlspecialchars($equipamento->ano_fabrico ?? '') ?>"
                                         min="1990"
                                         max="2026"
                                         required
@@ -378,7 +413,7 @@ function selecionado($valor_atual, $valor_opcao)
                                         min="0"
                                         class="form-control" 
                                         name="custo" 
-                                        value="12500.00"
+                                        value="<?= htmlspecialchars($equipamento->custo ?? '') ?>"
                                         required
                                     >
                                 </div>
@@ -386,43 +421,51 @@ function selecionado($valor_atual, $valor_opcao)
                                 <div class="col-md-3">
                                     <label class="form-label fw-bold">Tipo de Entrada *</label>
                                     <select class="form-select" name="tipo_entrada" required>
-                                        <option selected>Compra</option>
-                                        <option>Doação</option>
-                                        <option>Aluguer</option>
-                                        <option>Empréstimo</option>
+                                        <option value="">Selecione...</option>
+                                        <option <?= selecionado($equipamento->tipo_entrada ?? '', 'Compra') ?>>Compra</option>
+                                        <option <?= selecionado($equipamento->tipo_entrada ?? '', 'Doação') ?>>Doação</option>
+                                        <option <?= selecionado($equipamento->tipo_entrada ?? '', 'Aluguer') ?>>Aluguer</option>
+                                        <option <?= selecionado($equipamento->tipo_entrada ?? '', 'Empréstimo') ?>>Empréstimo</option>
                                     </select>
                                 </div>
 
                                 <div class="col-md-3">
                                     <label class="form-label fw-bold">Estado Atual *</label>
                                     <select class="form-select" name="estado" required>
-                                        <option selected>Operacional</option>
-                                        <option>Em Manutenção</option>
-                                        <option>Inativo</option>
-                                        <option>Abatido</option>
+                                        <option value="">Selecione...</option>
+                                        <option <?= selecionado($equipamento->estado ?? '', 'Operacional') ?>>Operacional</option>
+                                        <option <?= selecionado($equipamento->estado ?? '', 'Em Manutenção') ?>>Em Manutenção</option>
+                                        <option <?= selecionado($equipamento->estado ?? '', 'Inativo') ?>>Inativo</option>
+                                        <option <?= selecionado($equipamento->estado ?? '', 'Abatido') ?>>Abatido</option>
                                     </select>
                                 </div>
 
                                 <div class="col-md-3">
                                     <label class="form-label fw-bold">Criticidade *</label>
                                     <select class="form-select" name="criticidade" required>
-                                        <option>Baixa</option>
-                                        <option>Média</option>
-                                        <option>Alta</option>
-                                        <option selected>Suporte de Vida</option>
+                                        <option value="">Selecione...</option>
+                                        <option <?= selecionado($equipamento->criticidade ?? '', 'Baixa') ?>>Baixa</option>
+                                        <option <?= selecionado($equipamento->criticidade ?? '', 'Média') ?>>Média</option>
+                                        <option <?= selecionado($equipamento->criticidade ?? '', 'Alta') ?>>Alta</option>
+                                        <option <?= selecionado($equipamento->criticidade ?? '', 'Suporte de Vida') ?>>Suporte de Vida</option>
                                     </select>
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Resumo do Estado</label>
                                     <div class="p-3 bg-light rounded border">
-                                        <span class="badge bg-success me-2">Operacional</span>
-                                        <span class="badge bg-danger">Suporte de Vida</span>
+                                        <span class="badge bg-secondary me-2">
+                                            <?= htmlspecialchars($equipamento->estado ?? 'Sem estado') ?>
+                                        </span>
+                                        <span class="badge bg-secondary">
+                                            <?= htmlspecialchars($equipamento->criticidade ?? 'Sem criticidade') ?>
+                                        </span>
                                         <p class="text-muted small mb-0 mt-2">
-                                            Equipamento crítico para suporte ventilatório. Deve ter documentação e manutenção atualizadas.
+                                            Estes valores serão atualizados depois de guardar as alterações.
                                         </p>
                                     </div>
                                 </div>
+
                             </div>
                         </div>
                     </div>
@@ -437,33 +480,49 @@ function selecionado($valor_atual, $valor_opcao)
 
                         <div class="card-body">
                             <div class="row g-3">
+
                                 <div class="col-md-3">
-                                    <label class="form-label fw-bold">Edifício *</label>
-                                    <input type="text" class="form-control" name="edificio" value="A" required>
+                                    <label class="form-label fw-bold">Edifício</label>
+                                    <input 
+                                        type="text" 
+                                        class="form-control" 
+                                        name="edificio" 
+                                        value="<?= htmlspecialchars($equipamento->edificio ?? '') ?>"
+                                    >
                                 </div>
 
                                 <div class="col-md-2">
-                                    <label class="form-label fw-bold">Piso *</label>
+                                    <label class="form-label fw-bold">Piso</label>
                                     <input 
                                         type="number" 
                                         class="form-control" 
                                         name="piso" 
-                                        value="1"
+                                        value="<?= htmlspecialchars($equipamento->piso ?? '') ?>"
                                         min="0"
                                         max="20"
-                                        required
                                     >
                                 </div>
 
                                 <div class="col-md-4">
-                                    <label class="form-label fw-bold">Serviço/Departamento *</label>
-                                    <input type="text" class="form-control" name="servico" value="Bloco Operatório" required>
+                                    <label class="form-label fw-bold">Serviço/Departamento</label>
+                                    <input 
+                                        type="text" 
+                                        class="form-control" 
+                                        name="servico" 
+                                        value="<?= htmlspecialchars($equipamento->servico ?? '') ?>"
+                                    >
                                 </div>
 
                                 <div class="col-md-3">
-                                    <label class="form-label fw-bold">Sala/Gabinete *</label>
-                                    <input type="text" class="form-control" name="sala" value="Sala 04" required>
+                                    <label class="form-label fw-bold">Sala/Gabinete</label>
+                                    <input 
+                                        type="text" 
+                                        class="form-control" 
+                                        name="sala" 
+                                        value="<?= htmlspecialchars($equipamento->sala ?? '') ?>"
+                                    >
                                 </div>
+
                             </div>
                         </div>
                     </div>
@@ -479,55 +538,14 @@ function selecionado($valor_atual, $valor_opcao)
                         <div class="card-body">
                             <div class="alert alert-info">
                                 <i class="fa-solid fa-circle-info me-2"></i>
-                                Nesta versão simplificada, podem ser registados nomes de ficheiros, caminhos ou ligações para documentos.
+                                A documentação será gerida no módulo próprio de Documentação.
+                                Esta secção serve apenas como apoio visual da ficha do equipamento.
                             </div>
 
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Manual de Utilizador</label>
-                                    <input type="text" class="form-control" name="doc_manual_util" value="manual_v500.pdf">
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Manual de Serviço</label>
-                                    <input type="text" class="form-control" name="doc_manual_serv" value="servico_v500.pdf">
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Certificado de Calibração</label>
-                                    <input type="text" class="form-control" name="doc_cert_calib" value="calibracao_2026.pdf">
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Contrato de Manutenção</label>
-                                    <input type="text" class="form-control" name="doc_contrato" value="contrato_drager.pdf">
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Fatura ou Guia de Aquisição</label>
-                                    <input type="text" class="form-control" name="doc_fatura" value="fatura_123.pdf">
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Declaração de Conformidade</label>
-                                    <input type="text" class="form-control" name="doc_conformidade" value="conformidade.pdf">
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Relatório Técnico</label>
-                                    <input type="text" class="form-control" name="doc_relatorio" value="relatorio_final.pdf">
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Link/Caminho Geral</label>
-                                    <input 
-                                        type="text" 
-                                        class="form-control" 
-                                        name="caminho_doc" 
-                                        value="/docs/equipamentos/EQP-001/"
-                                    >
-                                </div>
-                            </div>
+                            <p class="text-muted mb-0">
+                                Para associar, editar ou remover documentos, utiliza o módulo
+                                <strong>Documentação</strong>.
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -547,13 +565,13 @@ function selecionado($valor_atual, $valor_opcao)
                                     name="observacoes" 
                                     rows="5"
                                     maxlength="500"
-                                >Equipamento em estado excelente. Manutenção preventiva programada para dezembro de 2026.</textarea>
+                                ><?= htmlspecialchars($equipamento->observacoes ?? '') ?></textarea>
                                 <div class="form-text">Máximo de 500 caracteres.</div>
                             </div>
 
                             <div class="alert alert-warning">
                                 <i class="fa-solid fa-triangle-exclamation me-2"></i>
-                                Antes de guardar, confirme se as alterações estão corretas.
+                                Antes de guardar, confirma se as alterações estão corretas.
                             </div>
                         </div>
                     </div>
@@ -563,12 +581,12 @@ function selecionado($valor_atual, $valor_opcao)
 
             <!-- Botões finais -->
             <div class="d-flex justify-content-between align-items-center mt-4">
-                <a href="consultar.html" class="btn btn-outline-info">
+                <a href="consultar.php?id_equipamento=<?= htmlspecialchars($equipamento->id_equipamento) ?>" class="btn btn-outline-info">
                     <i class="fa-solid fa-eye me-2"></i>Ver Ficha
                 </a>
 
                 <div>
-                    <a href="equipamentos.html" class="btn btn-secondary me-2">
+                    <a href="equipamentos.php" class="btn btn-secondary me-2">
                         Cancelar
                     </a>
 
@@ -585,6 +603,7 @@ function selecionado($valor_atual, $valor_opcao)
         </form>
 
     </div>
+
         
         </main>
 </div>
