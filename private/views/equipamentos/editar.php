@@ -1,8 +1,140 @@
 <?php
 
 require_once __DIR__ . '/../../includes/funcoes.php';
-
+require_once __DIR__ . '/../../includes/database.php';
 redirect_if_not_logged();
+redirect_if_not_logged();
+
+$id_equipamento = $_GET['id_equipamento'] ?? $_POST['id_equipamento'] ?? null;
+
+if (empty($id_equipamento) || !is_numeric($id_equipamento)) {
+    header('Location: equipamentos.php');
+    exit;
+}
+
+$erro = '';
+
+try {
+    $sql = "SELECT * FROM vw_equipamentos_completo WHERE id_equipamento = :id_equipamento LIMIT 1";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindValue(':id_equipamento', $id_equipamento, PDO::PARAM_INT);
+    $stmt->execute();
+    $equipamento = $stmt->fetch();
+} catch (PDOException $e) {
+    $sql = "SELECT * FROM equipamentos WHERE id_equipamento = :id_equipamento LIMIT 1";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindValue(':id_equipamento', $id_equipamento, PDO::PARAM_INT);
+    $stmt->execute();
+    $equipamento = $stmt->fetch();
+}
+
+if (!$equipamento) {
+    header('Location: equipamentos.php');
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $codigo_inventario = limpar_texto($_POST['codigo_inventario'] ?? '');
+    $designacao = limpar_texto($_POST['designacao'] ?? '');
+    $categoria = limpar_texto($_POST['categoria'] ?? '');
+    $marca = limpar_texto($_POST['marca'] ?? '');
+    $modelo = limpar_texto($_POST['modelo'] ?? '');
+    $num_serie = limpar_texto($_POST['num_serie'] ?? '');
+    $fabricante = limpar_texto($_POST['fabricante'] ?? '');
+    $data_aquisicao = $_POST['data_aquisicao'] ?? null;
+    $ano_fabrico = $_POST['ano_fabrico'] ?? null;
+    $custo = $_POST['custo'] ?? null;
+    $tipo_entrada = limpar_texto($_POST['tipo_entrada'] ?? '');
+    $estado = limpar_texto($_POST['estado'] ?? '');
+    $criticidade = limpar_texto($_POST['criticidade'] ?? '');
+    $observacoes = limpar_texto($_POST['observacoes'] ?? '');
+
+    $edificio = limpar_texto($_POST['edificio'] ?? '');
+    $piso = $_POST['piso'] ?? null;
+    $servico = limpar_texto($_POST['servico'] ?? '');
+    $sala = limpar_texto($_POST['sala'] ?? '');
+
+    if (
+        empty($codigo_inventario) ||
+        empty($designacao) ||
+        empty($categoria) ||
+        empty($marca) ||
+        empty($modelo) ||
+        empty($num_serie) ||
+        empty($fabricante) ||
+        empty($data_aquisicao) ||
+        empty($ano_fabrico) ||
+        empty($tipo_entrada) ||
+        empty($estado) ||
+        empty($criticidade)
+    ) {
+        $erro = 'Preenche todos os campos obrigatórios.';
+    } else {
+        try {
+            $sql = "UPDATE equipamentos
+                    SET codigo_inventario = :codigo_inventario,
+                        designacao = :designacao,
+                        categoria = :categoria,
+                        marca = :marca,
+                        modelo = :modelo,
+                        num_serie = :num_serie,
+                        fabricante = :fabricante,
+                        data_aquisicao = :data_aquisicao,
+                        ano_fabrico = :ano_fabrico,
+                        custo = :custo,
+                        tipo_entrada = :tipo_entrada,
+                        estado = :estado,
+                        criticidade = :criticidade,
+                        observacoes = :observacoes
+                    WHERE id_equipamento = :id_equipamento";
+
+            $stmt = $pdo->prepare($sql);
+            $stmt->bindValue(':codigo_inventario', $codigo_inventario);
+            $stmt->bindValue(':designacao', $designacao);
+            $stmt->bindValue(':categoria', $categoria);
+            $stmt->bindValue(':marca', $marca);
+            $stmt->bindValue(':modelo', $modelo);
+            $stmt->bindValue(':num_serie', $num_serie);
+            $stmt->bindValue(':fabricante', $fabricante);
+            $stmt->bindValue(':data_aquisicao', $data_aquisicao);
+            $stmt->bindValue(':ano_fabrico', $ano_fabrico);
+            $stmt->bindValue(':custo', $custo);
+            $stmt->bindValue(':tipo_entrada', $tipo_entrada);
+            $stmt->bindValue(':estado', $estado);
+            $stmt->bindValue(':criticidade', $criticidade);
+            $stmt->bindValue(':observacoes', $observacoes);
+            $stmt->bindValue(':id_equipamento', $id_equipamento, PDO::PARAM_INT);
+            $stmt->execute();
+
+            if (!empty($equipamento->id_localizacao)) {
+                $sqlLocalizacao = "UPDATE localizacoes
+                                   SET edificio = :edificio,
+                                       piso = :piso,
+                                       servico = :servico,
+                                       sala = :sala
+                                   WHERE id_localizacao = :id_localizacao";
+
+                $stmtLocalizacao = $pdo->prepare($sqlLocalizacao);
+                $stmtLocalizacao->bindValue(':edificio', $edificio);
+                $stmtLocalizacao->bindValue(':piso', $piso);
+                $stmtLocalizacao->bindValue(':servico', $servico);
+                $stmtLocalizacao->bindValue(':sala', $sala);
+                $stmtLocalizacao->bindValue(':id_localizacao', $equipamento->id_localizacao, PDO::PARAM_INT);
+                $stmtLocalizacao->execute();
+            }
+
+            header('Location: consultar.php?id_equipamento=' . $id_equipamento);
+            exit;
+        } catch (PDOException $e) {
+            $erro = 'Erro ao atualizar o equipamento. Verifica se o código interno ou o número de série já existem noutro equipamento.';
+        }
+    }
+}
+
+function selecionado($valor_atual, $valor_opcao)
+{
+    return $valor_atual === $valor_opcao ? 'selected' : '';
+}
 
 ?>
 <!DOCTYPE html>

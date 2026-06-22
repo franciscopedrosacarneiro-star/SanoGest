@@ -1,8 +1,42 @@
 <?php
 
 require_once __DIR__ . '/../../includes/funcoes.php';
-
+require_once __DIR__ . '/../../includes/database.php';
 redirect_if_not_logged();
+$id_equipamento = $_GET['id_equipamento'] ?? null;
+
+if (empty($id_equipamento) || !is_numeric($id_equipamento)) {
+    header('Location: equipamentos.php');
+    exit;
+}
+
+$sql = "SELECT * FROM equipamentos WHERE id_equipamento = :id_equipamento LIMIT 1";
+$stmt = $pdo->prepare($sql);
+$stmt->bindValue(':id_equipamento', $id_equipamento, PDO::PARAM_INT);
+$stmt->execute();
+
+$equipamento = $stmt->fetch();
+
+if (!$equipamento) {
+    header('Location: equipamentos.php');
+    exit;
+}
+
+$erro = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    try {
+        $sql = "DELETE FROM equipamentos WHERE id_equipamento = :id_equipamento";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindValue(':id_equipamento', $id_equipamento, PDO::PARAM_INT);
+        $stmt->execute();
+
+        header('Location: equipamentos.php');
+        exit;
+    } catch (PDOException $e) {
+        $erro = 'Não foi possível remover o equipamento, porque pode ter garantias, documentos ou manutenções associados.';
+    }
+}
 
 ?>
 <!DOCTYPE html>
@@ -10,7 +44,7 @@ redirect_if_not_logged();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SanoGest | Novo Equipamento</title>
+    <title>SanoGest | Apagar Equipamento</title>
     <link rel="stylesheet" href="../../../assets/css/bootstrap.min.css">
     <link rel="stylesheet" href="../../../assets/css/1240881.css">
     <link rel="stylesheet" href="../../../assets/fontawesome/all.min.css">
@@ -46,7 +80,7 @@ redirect_if_not_logged();
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2" aria-labelledby="menuUtilizador">
                         <li>
-                            <a class="dropdown-item py-2" href="../../../private/views/perfil/alterar-senha.html">
+                            <a class="dropdown-item py-2" href="../../../private/views/perfil/alterar-senha.php">
                                 <i class="fa-solid fa-key me-2 text-muted"></i>Trocar palavra-passe
                             </a>
                         </li>
@@ -69,29 +103,69 @@ redirect_if_not_logged();
         <div class="p-3">
             <ul class="nav nav-pills flex-column mb-auto">
                 
-                <li><a href="../equipamentos/equipamentos.html" class="nav-link text-dark"><i class="fa-solid fa-microchip me-2"></i>Equipamentos</a></li>
+                <li><a href="../equipamentos/equipamentos.php" class="nav-link text-dark"><i class="fa-solid fa-microchip me-2"></i>Equipamentos</a></li>
                
             </ul>
         </div>
     </nav>
 
     <main class="p-5 fundo-dashboard conteudo-principal">
-        <div class="bg-white bg-opacity-75 p-5 rounded shadow-sm"> 
-           <div class="text-danger mb-3">
+          <div class="bg-white bg-opacity-75 p-5 rounded shadow-sm text-center">
+
+        <div class="text-danger mb-3">
             <i class="fa-solid fa-triangle-exclamation fa-4x"></i>
         </div>
 
         <h2 class="text-danger mb-3">Confirmar Remoção</h2>
-           <p class="mb-4">
-            Tem a certeza que pretende remover permanentemente o equipamento<strong>[Nome do Equipamento]</strong>?<br>
-            Esta ação é irreversível e irá remover todos os registos associados a este ativo.
-           </p>
-                 <div class="d-flex justify-content-center gap-3">
-                <a href="equipamentos.html" class="btn btn-secondary px-4">Cancelar</a>
-                <button type="submit" class="btn btn-danger px-4">Sim, Remover Equipamento</button>
+
+        <?php if (!empty($erro)): ?>
+            <div class="alert alert-danger text-start">
+                <i class="fa-solid fa-circle-exclamation me-2"></i>
+                <?= htmlspecialchars($erro) ?>
             </div>
-           </div>
+        <?php endif; ?>
+
+        <p class="mb-4">
+            Tem a certeza que pretende remover permanentemente o equipamento
+            <strong>
+                <?= htmlspecialchars($equipamento->codigo_inventario) ?> -
+                <?= htmlspecialchars($equipamento->designacao) ?>
+            </strong>?
+            <br>
+            Esta ação é irreversível e poderá remover este ativo do inventário.
+        </p>
+
+        <div class="card shadow-sm border-0 mb-4 text-start">
+            <div class="card-header bg-light fw-bold">
+                <i class="fa-solid fa-microchip me-2 text-primary"></i>
+                Dados do equipamento
+            </div>
+
+            <div class="card-body">
+                <p><strong>Código:</strong> <?= htmlspecialchars($equipamento->codigo_inventario) ?></p>
+                <p><strong>Designação:</strong> <?= htmlspecialchars($equipamento->designacao) ?></p>
+                <p><strong>Categoria:</strong> <?= htmlspecialchars($equipamento->categoria) ?></p>
+                <p><strong>Marca/Modelo:</strong> <?= htmlspecialchars($equipamento->marca) ?> / <?= htmlspecialchars($equipamento->modelo) ?></p>
+                <p><strong>N.º Série:</strong> <?= htmlspecialchars($equipamento->num_serie) ?></p>
+                <p><strong>Estado:</strong> <?= htmlspecialchars($equipamento->estado) ?></p>
+                <p><strong>Criticidade:</strong> <?= htmlspecialchars($equipamento->criticidade) ?></p>
+            </div>
         </div>
+
+        <form action="#" method="post">
+            <div class="d-flex justify-content-center gap-3">
+                <a href="equipamentos.php" class="btn btn-secondary px-4">
+                    <i class="fa-solid fa-xmark me-2"></i>Cancelar
+                </a>
+
+                <button type="submit" class="btn btn-danger px-4">
+                    <i class="fa-solid fa-trash me-2"></i>Sim, Remover Equipamento
+                </button>
+            </div>
+        </form>
+
+    </div>
+
         </main>
 </div>
     

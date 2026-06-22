@@ -1,8 +1,62 @@
 <?php
 
 require_once __DIR__ . '/../../includes/funcoes.php';
-
+require_once __DIR__ . '/../../includes/database.php';
 redirect_if_not_logged();
+try {
+    $sql = "SELECT * FROM vw_equipamentos_completo ORDER BY id_equipamento DESC";
+    $stmt = $pdo->query($sql);
+    $equipamentos = $stmt->fetchAll();
+} catch (PDOException $erro) {
+    $sql = "SELECT * FROM equipamentos ORDER BY id_equipamento DESC";
+    $stmt = $pdo->query($sql);
+    $equipamentos = $stmt->fetchAll();
+}
+
+$totalEquipamentos = count($equipamentos);
+
+$totalOperacionais = 0;
+$totalManutencao = 0;
+$totalAltaCriticidade = 0;
+
+foreach ($equipamentos as $equipamento) {
+    if (($equipamento->estado ?? '') === 'Operacional') {
+        $totalOperacionais++;
+    }
+
+    if (($equipamento->estado ?? '') === 'Em Manutenção') {
+        $totalManutencao++;
+    }
+
+    if (
+        ($equipamento->criticidade ?? '') === 'Alta' ||
+        ($equipamento->criticidade ?? '') === 'Suporte de Vida'
+    ) {
+        $totalAltaCriticidade++;
+    }
+}
+
+function badge_estado_equipamento($estado)
+{
+    return match ($estado) {
+        'Operacional' => 'success',
+        'Em Manutenção' => 'warning text-dark',
+        'Inativo' => 'secondary',
+        'Abatido' => 'dark',
+        default => 'secondary'
+    };
+}
+
+function badge_criticidade_equipamento($criticidade)
+{
+    return match ($criticidade) {
+        'Baixa' => 'secondary',
+        'Média' => 'info text-dark',
+        'Alta' => 'warning text-dark',
+        'Suporte de Vida' => 'danger',
+        default => 'secondary'
+    };
+}
 
 ?>
 <!DOCTYPE html>
@@ -46,7 +100,7 @@ redirect_if_not_logged();
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2" aria-labelledby="menuUtilizador">
                         <li>
-                            <a class="dropdown-item py-2" href="../../../private/views/perfil/alterar-senha.html">
+                            <a class="dropdown-item py-2" href="../../../private/views/perfil/alterar-senha.php">
                                 <i class="fa-solid fa-key me-2 text-muted"></i>Trocar palavra-passe
                             </a>
                         </li>
@@ -68,12 +122,12 @@ redirect_if_not_logged();
     <nav class="bg-white border-end shadow-sm sidebar-fixa">
         <div class="p-3">
             <ul class="nav nav-pills flex-column mb-auto">
-                <li><a href="../dashboard/dashboard.html" class="nav-link text-dark"><i class="fa-solid fa-gauge me-2"></i>Dashboard</a></li>
-                <li><a href="../equipamentos/equipamentos.html" class="nav-link text-dark"><i class="fa-solid fa-microchip me-2"></i>Equipamentos</a></li>
-                <li><a href="../fornecedores/fornecedores.html" class="nav-link text-dark"><i class="fa-solid fa-truck-medical me-2"></i>Fornecedores</a></li>
-                <li><a href="../localizacoes/localizacoes.html" class="nav-link text-dark"><i class="fa-solid fa-map-location-dot me-2"></i>Localizações</a></li>
-                <li><a href="../garantias/garantias.html" class="nav-link text-dark"><i class="fa-solid fa-shield-halved me-2"></i>Garantias</a></li>
-                <li><a href="../documentacao/documentacao.html" class="nav-link text-dark"><i class="fa-solid fa-file-contract me-2"></i>Documentação</a></li>
+                <li><a href="../dashboard/dashboard.php" class="nav-link text-dark"><i class="fa-solid fa-gauge me-2"></i>Dashboard</a></li>
+                <li><a href="../equipamentos/equipamentos.php" class="nav-link text-dark"><i class="fa-solid fa-microchip me-2"></i>Equipamentos</a></li>
+                <li><a href="../fornecedores/fornecedores.php" class="nav-link text-dark"><i class="fa-solid fa-truck-medical me-2"></i>Fornecedores</a></li>
+                <li><a href="../localizacoes/localizacoes.php" class="nav-link text-dark"><i class="fa-solid fa-map-location-dot me-2"></i>Localizações</a></li>
+                <li><a href="../garantias/garantias.php" class="nav-link text-dark"><i class="fa-solid fa-shield-halved me-2"></i>Garantias</a></li>
+                <li><a href="../documentacao/documentacao.php" class="nav-link text-dark"><i class="fa-solid fa-file-contract me-2"></i>Documentação</a></li>
                 <li>
                     <a href="../editar/editar-index.html" class="nav-link active">
                         <i class="fa-solid fa-pen-to-square me-2"></i>Editar Página Pública
@@ -97,7 +151,7 @@ redirect_if_not_logged();
                 </p>
             </div>
 
-            <a href="novo.html" class="btn btn-primary">
+            <a href="novo.php" class="btn btn-primary">
                 <i class="fa-solid fa-plus me-2"></i>Novo Equipamento
             </a>
         </div>
@@ -107,7 +161,7 @@ redirect_if_not_logged();
             <div class="col-md-3">
                 <div class="card p-3 shadow-sm border-0 border-start border-primary border-5 h-100">
                     <h6 class="text-muted">Total</h6>
-                    <h3 class="fw-bold mb-0">6</h3>
+                    <h3 class="fw-bold mb-0"><?= $totalEquipamentos ?></h3>
                     <small class="text-muted">Equipamentos registados</small>
                 </div>
             </div>
@@ -115,7 +169,7 @@ redirect_if_not_logged();
             <div class="col-md-3">
                 <div class="card p-3 shadow-sm border-0 border-start border-success border-5 h-100">
                     <h6 class="text-muted">Operacionais</h6>
-                    <h3 class="fw-bold mb-0">4</h3>
+                    <h3 class="fw-bold mb-0"><?= $totalOperacionais ?></h3>
                     <small class="text-muted">Disponíveis para utilização</small>
                 </div>
             </div>
@@ -123,7 +177,7 @@ redirect_if_not_logged();
             <div class="col-md-3">
                 <div class="card p-3 shadow-sm border-0 border-start border-warning border-5 h-100">
                     <h6 class="text-muted">Em Manutenção</h6>
-                    <h3 class="fw-bold mb-0">1</h3>
+                    <h3 class="fw-bold mb-0"><?= $totalManutencao ?></h3>
                     <small class="text-muted">A aguardar intervenção</small>
                 </div>
             </div>
@@ -131,7 +185,7 @@ redirect_if_not_logged();
             <div class="col-md-3">
                 <div class="card p-3 shadow-sm border-0 border-start border-danger border-5 h-100">
                     <h6 class="text-muted">Alta Criticidade</h6>
-                    <h3 class="fw-bold mb-0">3</h3>
+                    <h3 class="fw-bold mb-0"><?= $totalAltaCriticidade ?></h3>
                     <small class="text-muted">Alta ou suporte de vida</small>
                 </div>
             </div>
@@ -215,149 +269,71 @@ redirect_if_not_logged();
             </thead>
 
             <tbody>
-                <tr 
-                    data-categoria="Suporte de Vida" 
-                    data-estado="Operacional" 
-                    data-criticidade="Suporte de Vida"
-                >
-                    <td class="fw-bold">EQP-001</td>
-                    <td>Ventilador Pulmonar</td>
-                    <td>Suporte de Vida</td>
-                    <td>Dräger / Evita V500</td>
-                    <td><span class="badge bg-success">Operacional</span></td>
-                    <td><span class="badge bg-danger">Suporte de Vida</span></td>
-                    <td class="text-end">
-                        <a href="consultar.html" class="btn btn-sm btn-outline-info" title="Consultar">
-                            <i class="fa-solid fa-eye"></i>
-                        </a>
-                        <a href="editar.html" class="btn btn-sm btn-outline-warning" title="Editar">
-                            <i class="fa-solid fa-pen"></i>
-                        </a>
-                        <a href="apagar.html" class="btn btn-sm btn-outline-danger" title="Remover">
-                            <i class="fa-solid fa-trash"></i>
-                        </a>
-                    </td>
-                </tr>
+                    <?php if (empty($equipamentos)): ?>
+        <tr>
+            <td colspan="7" class="text-center text-muted py-4">
+                <i class="fa-solid fa-circle-info me-2"></i>
+                Não existem equipamentos registados.
+            </td>
+        </tr>
+    <?php else: ?>
+        <?php foreach ($equipamentos as $equipamento): ?>
+            <tr 
+                data-categoria="<?= htmlspecialchars($equipamento->categoria ?? '') ?>" 
+                data-estado="<?= htmlspecialchars($equipamento->estado ?? '') ?>" 
+                data-criticidade="<?= htmlspecialchars($equipamento->criticidade ?? '') ?>"
+            >
+                <td class="fw-bold">
+                    <?= htmlspecialchars($equipamento->codigo_inventario ?? '') ?>
+                </td>
 
-                <tr 
-                    data-categoria="Monitorização" 
-                    data-estado="Operacional" 
-                    data-criticidade="Alta"
-                >
-                    <td class="fw-bold">EQP-002</td>
-                    <td>Monitor Multiparamétrico</td>
-                    <td>Monitorização</td>
-                    <td>Philips / IntelliVue MP5</td>
-                    <td><span class="badge bg-success">Operacional</span></td>
-                    <td><span class="badge bg-warning text-dark">Alta</span></td>
-                    <td class="text-end">
-                        <a href="consultar.html" class="btn btn-sm btn-outline-info" title="Consultar">
-                            <i class="fa-solid fa-eye"></i>
-                        </a>
-                        <a href="editar.html" class="btn btn-sm btn-outline-warning" title="Editar">
-                            <i class="fa-solid fa-pen"></i>
-                        </a>
-                        <a href="apagar.html" class="btn btn-sm btn-outline-danger" title="Remover">
-                            <i class="fa-solid fa-trash"></i>
-                        </a>
-                    </td>
-                </tr>
+                <td>
+                    <?= htmlspecialchars($equipamento->designacao ?? '') ?>
+                </td>
 
-                <tr 
-                    data-categoria="Terapia" 
-                    data-estado="Em Manutenção" 
-                    data-criticidade="Média"
-                >
-                    <td class="fw-bold">EQP-003</td>
-                    <td>Bomba de Infusão</td>
-                    <td>Terapia</td>
-                    <td>B. Braun / Infusomat Space</td>
-                    <td><span class="badge bg-warning text-dark">Em Manutenção</span></td>
-                    <td><span class="badge bg-info text-dark">Média</span></td>
-                    <td class="text-end">
-                        <a href="consultar.html" class="btn btn-sm btn-outline-info" title="Consultar">
-                            <i class="fa-solid fa-eye"></i>
-                        </a>
-                        <a href="editar.html" class="btn btn-sm btn-outline-warning" title="Editar">
-                            <i class="fa-solid fa-pen"></i>
-                        </a>
-                        <a href="apagar.html" class="btn btn-sm btn-outline-danger" title="Remover">
-                            <i class="fa-solid fa-trash"></i>
-                        </a>
-                    </td>
-                </tr>
+                <td>
+                    <?= htmlspecialchars($equipamento->categoria ?? '') ?>
+                </td>
 
-                <tr 
-                    data-categoria="Suporte de Vida" 
-                    data-estado="Operacional" 
-                    data-criticidade="Alta"
-                >
-                    <td class="fw-bold">EQP-004</td>
-                    <td>Desfibrilhador</td>
-                    <td>Suporte de Vida</td>
-                    <td>Zoll / R Series</td>
-                    <td><span class="badge bg-success">Operacional</span></td>
-                    <td><span class="badge bg-warning text-dark">Alta</span></td>
-                    <td class="text-end">
-                        <a href="consultar.html" class="btn btn-sm btn-outline-info" title="Consultar">
-                            <i class="fa-solid fa-eye"></i>
-                        </a>
-                        <a href="editar.html" class="btn btn-sm btn-outline-warning" title="Editar">
-                            <i class="fa-solid fa-pen"></i>
-                        </a>
-                        <a href="apagar.html" class="btn btn-sm btn-outline-danger" title="Remover">
-                            <i class="fa-solid fa-trash"></i>
-                        </a>
-                    </td>
-                </tr>
+                <td>
+                    <?= htmlspecialchars(($equipamento->marca ?? '') . ' / ' . ($equipamento->modelo ?? '')) ?>
+                </td>
 
-                <tr 
-                    data-categoria="Diagnóstico" 
-                    data-estado="Inativo" 
-                    data-criticidade="Baixa"
-                >
-                    <td class="fw-bold">EQP-005</td>
-                    <td>Eletrocardiógrafo</td>
-                    <td>Diagnóstico</td>
-                    <td>GE / MAC 2000</td>
-                    <td><span class="badge bg-secondary">Inativo</span></td>
-                    <td><span class="badge bg-secondary">Baixa</span></td>
-                    <td class="text-end">
-                        <a href="consultar.html" class="btn btn-sm btn-outline-info" title="Consultar">
-                            <i class="fa-solid fa-eye"></i>
-                        </a>
-                        <a href="editar.html" class="btn btn-sm btn-outline-warning" title="Editar">
-                            <i class="fa-solid fa-pen"></i>
-                        </a>
-                        <a href="apagar.html" class="btn btn-sm btn-outline-danger" title="Remover">
-                            <i class="fa-solid fa-trash"></i>
-                        </a>
-                    </td>
-                </tr>
+                <td>
+                    <span class="badge bg-<?= badge_estado_equipamento($equipamento->estado ?? '') ?>">
+                        <?= htmlspecialchars($equipamento->estado ?? '') ?>
+                    </span>
+                </td>
 
-                <tr 
-                    data-categoria="Laboratório" 
-                    data-estado="Operacional" 
-                    data-criticidade="Média"
-                >
-                    <td class="fw-bold">EQP-006</td>
-                    <td>Centrífuga</td>
-                    <td>Laboratório</td>
-                    <td>Eppendorf / 5810 R</td>
-                    <td><span class="badge bg-success">Operacional</span></td>
-                    <td><span class="badge bg-info text-dark">Média</span></td>
-                    <td class="text-end">
-                        <a href="consultar.html" class="btn btn-sm btn-outline-info" title="Consultar">
-                            <i class="fa-solid fa-eye"></i>
-                        </a>
-                        <a href="editar.html" class="btn btn-sm btn-outline-warning" title="Editar">
-                            <i class="fa-solid fa-pen"></i>
-                        </a>
-                        <a href="apagar.html" class="btn btn-sm btn-outline-danger" title="Remover">
-                            <i class="fa-solid fa-trash"></i>
-                        </a>
-                    </td>
-                </tr>
+                <td>
+                    <span class="badge bg-<?= badge_criticidade_equipamento($equipamento->criticidade ?? '') ?>">
+                        <?= htmlspecialchars($equipamento->criticidade ?? '') ?>
+                    </span>
+                </td>
+
+                <td class="text-end">
+                    <a href="consultar.php?id_equipamento=<?= $equipamento->id_equipamento ?>" 
+                       class="btn btn-sm btn-outline-info" 
+                       title="Consultar">
+                        <i class="fa-solid fa-eye"></i>
+                    </a>
+
+                    <a href="editar.php?id_equipamento=<?= $equipamento->id_equipamento ?>" 
+                       class="btn btn-sm btn-outline-warning" 
+                       title="Editar">
+                        <i class="fa-solid fa-pen"></i>
+                    </a>
+
+                    <a href="apagar.php?id_equipamento=<?= $equipamento->id_equipamento ?>" 
+                       class="btn btn-sm btn-outline-danger" 
+                       title="Remover">
+                        <i class="fa-solid fa-trash"></i>
+                    </a>
+                </td>
+            </tr>
+        <?php endforeach; ?>
+    <?php endif; ?>
+
             </tbody>
         </table>
     </div>
