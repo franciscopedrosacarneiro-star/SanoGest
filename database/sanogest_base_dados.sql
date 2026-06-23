@@ -1,17 +1,29 @@
+
 -- =====================================================
--- BASE DE DADOS SanoGest
--- Gerada a partir do projeto HTML enviado em SanoGest.zip
--- Compatível com MySQL/MariaDB no Laragon/phpMyAdmin
+-- BASE DE DADOS SanoGest 
 -- =====================================================
 
-DROP DATABASE IF EXISTS sanogest;
-CREATE DATABASE sanogest
-    CHARACTER SET utf8mb4
-    COLLATE utf8mb4_unicode_ci;
-
-USE sanogest;
-
+SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
+
+-- Remover views primeiro, se existirem
+DROP VIEW IF EXISTS vw_documentos_completo;
+DROP VIEW IF EXISTS vw_garantias_completo;
+DROP VIEW IF EXISTS vw_localizacoes_completo;
+DROP VIEW IF EXISTS vw_fornecedores_completo;
+DROP VIEW IF EXISTS vw_equipamentos_completo;
+
+-- Remover tabelas pela ordem correta, respeitando chaves estrangeiras
+DROP TABLE IF EXISTS auditoria;
+DROP TABLE IF EXISTS manutencoes;
+DROP TABLE IF EXISTS documentos;
+DROP TABLE IF EXISTS garantias_contratos;
+DROP TABLE IF EXISTS equipamento_fornecedor;
+DROP TABLE IF EXISTS equipamentos;
+DROP TABLE IF EXISTS fornecedores;
+DROP TABLE IF EXISTS localizacoes;
+DROP TABLE IF EXISTS conteudo_publico;
+DROP TABLE IF EXISTS utilizadores;
 
 -- =====================================================
 -- 1. UTILIZADORES / LOGIN
