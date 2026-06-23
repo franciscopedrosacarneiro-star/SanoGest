@@ -5,60 +5,19 @@ require_once __DIR__ . '/../../includes/database.php';
 redirect_if_not_logged();
 $id_equipamento = $_GET['id_equipamento'] ?? null;
 
-if (empty($id_equipamento) || !is_numeric($id_equipamento)) {
-    header('Location: equipamentos.php');
-    exit;
+if (!validar_id($id_equipamento)) {
+    redirecionar('equipamentos.php');
 }
 
-try {
-    $sql = "SELECT * FROM vw_equipamentos_completo WHERE id_equipamento = :id_equipamento LIMIT 1";
-    $stmt = $pdo->prepare($sql);
-    $stmt->bindValue(':id_equipamento', $id_equipamento, PDO::PARAM_INT);
-    $stmt->execute();
-
-    $equipamento = $stmt->fetch();
-} catch (PDOException $erro) {
-    $sql = "SELECT * FROM equipamentos WHERE id_equipamento = :id_equipamento LIMIT 1";
-    $stmt = $pdo->prepare($sql);
-    $stmt->bindValue(':id_equipamento', $id_equipamento, PDO::PARAM_INT);
-    $stmt->execute();
-
-    $equipamento = $stmt->fetch();
-}
+$equipamento = buscar_equipamento_por_id($pdo, $id_equipamento);
 
 if (!$equipamento) {
-    header('Location: equipamentos.php');
-    exit;
+    redirecionar('equipamentos.php');
 }
 
-$sqlDocumentos = "SELECT * FROM documentos WHERE id_equipamento = :id_equipamento ORDER BY tipo_documento ASC";
-$stmtDocumentos = $pdo->prepare($sqlDocumentos);
-$stmtDocumentos->bindValue(':id_equipamento', $id_equipamento, PDO::PARAM_INT);
-$stmtDocumentos->execute();
+$documentos = buscar_documentos_do_equipamento($pdo, $id_equipamento);
 
-$documentos = $stmtDocumentos->fetchAll();
 
-function badge_estado_equipamento($estado)
-{
-    return match ($estado) {
-        'Operacional' => 'success',
-        'Em Manutenção' => 'warning text-dark',
-        'Inativo' => 'secondary',
-        'Abatido' => 'dark',
-        default => 'secondary'
-    };
-}
-
-function badge_criticidade_equipamento($criticidade)
-{
-    return match ($criticidade) {
-        'Baixa' => 'secondary',
-        'Média' => 'info text-dark',
-        'Alta' => 'warning text-dark',
-        'Suporte de Vida' => 'danger',
-        default => 'secondary'
-    };
-}
 
 ?>
 <!DOCTYPE html>
@@ -308,7 +267,7 @@ function badge_criticidade_equipamento($criticidade)
                 <?= !empty($equipamento->observacoes) ? nl2br(htmlspecialchars($equipamento->observacoes)) : 'Sem observações registadas.' ?>
             </div>
         </div>
-
+           </div>
 
         </main>
 </div>

@@ -3,60 +3,14 @@
 require_once __DIR__ . '/../../includes/funcoes.php';
 require_once __DIR__ . '/../../includes/database.php';
 redirect_if_not_logged();
-try {
-    $sql = "SELECT * FROM vw_equipamentos_completo ORDER BY id_equipamento DESC";
-    $stmt = $pdo->query($sql);
-    $equipamentos = $stmt->fetchAll();
-} catch (PDOException $erro) {
-    $sql = "SELECT * FROM equipamentos ORDER BY id_equipamento DESC";
-    $stmt = $pdo->query($sql);
-    $equipamentos = $stmt->fetchAll();
-}
+$equipamentos = listar_equipamentos($pdo);
+$estatisticas = calcular_estatisticas_equipamentos($equipamentos);
 
-$totalEquipamentos = count($equipamentos);
+$totalEquipamentos = $estatisticas['total'];
+$totalOperacionais = $estatisticas['operacionais'];
+$totalManutencao = $estatisticas['manutencao'];
+$totalAltaCriticidade = $estatisticas['alta_criticidade'];
 
-$totalOperacionais = 0;
-$totalManutencao = 0;
-$totalAltaCriticidade = 0;
-
-foreach ($equipamentos as $equipamento) {
-    if (($equipamento->estado ?? '') === 'Operacional') {
-        $totalOperacionais++;
-    }
-
-    if (($equipamento->estado ?? '') === 'Em Manutenção') {
-        $totalManutencao++;
-    }
-
-    if (
-        ($equipamento->criticidade ?? '') === 'Alta' ||
-        ($equipamento->criticidade ?? '') === 'Suporte de Vida'
-    ) {
-        $totalAltaCriticidade++;
-    }
-}
-
-function badge_estado_equipamento($estado)
-{
-    return match ($estado) {
-        'Operacional' => 'success',
-        'Em Manutenção' => 'warning text-dark',
-        'Inativo' => 'secondary',
-        'Abatido' => 'dark',
-        default => 'secondary'
-    };
-}
-
-function badge_criticidade_equipamento($criticidade)
-{
-    return match ($criticidade) {
-        'Baixa' => 'secondary',
-        'Média' => 'info text-dark',
-        'Alta' => 'warning text-dark',
-        'Suporte de Vida' => 'danger',
-        default => 'secondary'
-    };
-}
 
 ?>
 <!DOCTYPE html>
@@ -319,7 +273,7 @@ function badge_criticidade_equipamento($criticidade)
                             <i class="fa-solid fa-eye"></i>
                   </a>
 
-                       <?php if (($equipamento->estado ?? '') !== 'Abatido'): ?>
+                      <?php if (!equipamento_abatido($equipamento)): ?>
                    <a href="editar.php?id_equipamento=<?= $equipamento->id_equipamento ?>" 
                          class="btn btn-sm btn-outline-warning" 
                           title="Editar">

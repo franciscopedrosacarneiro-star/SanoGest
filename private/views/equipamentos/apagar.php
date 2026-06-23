@@ -2,40 +2,31 @@
 
 require_once __DIR__ . '/../../includes/funcoes.php';
 require_once __DIR__ . '/../../includes/database.php';
+
 redirect_if_not_logged();
+
 $id_equipamento = $_GET['id_equipamento'] ?? null;
 
-if (empty($id_equipamento) || !is_numeric($id_equipamento)) {
-    header('Location: equipamentos.php');
-    exit;
+if (!validar_id($id_equipamento)) {
+    redirecionar('equipamentos.php');
 }
 
-$sql = "SELECT * FROM equipamentos WHERE id_equipamento = :id_equipamento LIMIT 1";
-$stmt = $pdo->prepare($sql);
-$stmt->bindValue(':id_equipamento', $id_equipamento, PDO::PARAM_INT);
-$stmt->execute();
-
-$equipamento = $stmt->fetch();
+$equipamento = buscar_equipamento_por_id($pdo, $id_equipamento);
 
 if (!$equipamento) {
-    header('Location: equipamentos.php');
-    exit;
+    redirecionar('equipamentos.php');
+}
+
+if (equipamento_abatido($equipamento)) {
+    redirecionar('consultar.php?id_equipamento=' . $id_equipamento);
 }
 
 $erro = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
-        $sql = "UPDATE equipamentos
-                SET estado = 'Abatido'
-                WHERE id_equipamento = :id_equipamento";
-
-        $stmt = $pdo->prepare($sql);
-        $stmt->bindValue(':id_equipamento', $id_equipamento, PDO::PARAM_INT);
-        $stmt->execute();
-
-        header('Location: consultar.php?id_equipamento=' . $id_equipamento);
-        exit;
+        abater_equipamento($pdo, $id_equipamento);
+        redirecionar('consultar.php?id_equipamento=' . $id_equipamento);
     } catch (PDOException $e) {
         $erro = 'Não foi possível abater o equipamento.';
     }
@@ -119,7 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <i class="fa-solid fa-triangle-exclamation fa-4x"></i>
         </div>
 
-        <h2 class="text-danger mb-3">Confirmar Remoção</h2>
+        <h2 class="text-danger mb-3">Confirmar Abate</h2>
 
         <?php if (!empty($erro)): ?>
             <div class="alert alert-danger text-start">
