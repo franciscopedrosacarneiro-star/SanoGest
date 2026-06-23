@@ -489,3 +489,303 @@ function validar_dados_equipamento($dados, $validar_localizacao = true)
 
     return true;
 }
+// =====================================================
+// FORNECEDORES — BADGES / ESTADOS VISUAIS
+// =====================================================
+
+function badge_estado_fornecedor($estado)
+{
+    return match ($estado) {
+        'Ativo' => 'success',
+        'Inativo' => 'secondary',
+        default => 'secondary'
+    };
+}
+
+function badge_prioridade_fornecedor($prioridade)
+{
+    return match ($prioridade) {
+        'Normal' => 'secondary',
+        'Alta' => 'warning text-dark',
+        'Urgente' => 'danger',
+        default => 'secondary'
+    };
+}
+
+function fornecedor_inativo($fornecedor)
+{
+    return ($fornecedor->estado ?? '') === 'Inativo';
+}
+
+
+// =====================================================
+// FORNECEDORES — LISTAGEM E CONSULTA
+// =====================================================
+
+function listar_fornecedores($pdo)
+{
+    try {
+        $sql = "SELECT * FROM vw_fornecedores_completo ORDER BY id_fornecedor DESC";
+        $stmt = $pdo->query($sql);
+        return $stmt->fetchAll();
+    } catch (PDOException $erro) {
+        $sql = "SELECT * FROM fornecedores ORDER BY id_fornecedor DESC";
+        $stmt = $pdo->query($sql);
+        return $stmt->fetchAll();
+    }
+}
+
+function buscar_fornecedor_por_id($pdo, $id_fornecedor)
+{
+    if (!validar_id($id_fornecedor)) {
+        return false;
+    }
+
+    try {
+        $sql = "SELECT * FROM vw_fornecedores_completo
+                WHERE id_fornecedor = :id_fornecedor
+                LIMIT 1";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindValue(':id_fornecedor', $id_fornecedor, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $fornecedor = $stmt->fetch();
+
+        if ($fornecedor) {
+            return $fornecedor;
+        }
+    } catch (PDOException $erro) {
+        // Se a view falhar, procura na tabela base.
+    }
+
+    $sql = "SELECT * FROM fornecedores
+            WHERE id_fornecedor = :id_fornecedor
+            LIMIT 1";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindValue(':id_fornecedor', $id_fornecedor, PDO::PARAM_INT);
+    $stmt->execute();
+
+    return $stmt->fetch();
+}
+
+function calcular_estatisticas_fornecedores($fornecedores)
+{
+    $estatisticas = [
+        'total' => count($fornecedores),
+        'ativos' => 0,
+        'inativos' => 0,
+        'contrato_ativo' => 0
+    ];
+
+    foreach ($fornecedores as $fornecedor) {
+        if (($fornecedor->estado ?? '') === 'Ativo') {
+            $estatisticas['ativos']++;
+        }
+
+        if (($fornecedor->estado ?? '') === 'Inativo') {
+            $estatisticas['inativos']++;
+        }
+
+        if (($fornecedor->contrato_ativo ?? '') === 'Sim') {
+            $estatisticas['contrato_ativo']++;
+        }
+    }
+
+    return $estatisticas;
+}
+
+
+// =====================================================
+// FORNECEDORES — INATIVAR / SOFT DELETE
+// =====================================================
+
+function inativar_fornecedor($pdo, $id_fornecedor)
+{
+    if (!validar_id($id_fornecedor)) {
+        return false;
+    }
+
+    $sql = "UPDATE fornecedores
+            SET estado = 'Inativo'
+            WHERE id_fornecedor = :id_fornecedor";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindValue(':id_fornecedor', $id_fornecedor, PDO::PARAM_INT);
+
+    return $stmt->execute();
+}
+
+
+// =====================================================
+// FORNECEDORES — CRIAÇÃO
+// =====================================================
+
+function criar_fornecedor($pdo, $dados)
+{
+    $sql = "INSERT INTO fornecedores
+            (
+                nome_empresa,
+                nif,
+                estado,
+                tipo_fornecedor,
+                area_atuacao,
+                email,
+                telefone,
+                website,
+                pessoa_contacto,
+                tel_pessoa,
+                morada,
+                contrato_ativo,
+                relacao_hospital,
+                prioridade_contacto,
+                observacoes
+            )
+            VALUES
+            (
+                :nome_empresa,
+                :nif,
+                :estado,
+                :tipo_fornecedor,
+                :area_atuacao,
+                :email,
+                :telefone,
+                :website,
+                :pessoa_contacto,
+                :tel_pessoa,
+                :morada,
+                :contrato_ativo,
+                :relacao_hospital,
+                :prioridade_contacto,
+                :observacoes
+            )";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindValue(':nome_empresa', $dados['nome_empresa']);
+    $stmt->bindValue(':nif', $dados['nif']);
+    $stmt->bindValue(':estado', $dados['estado']);
+    $stmt->bindValue(':tipo_fornecedor', $dados['tipo_fornecedor']);
+    $stmt->bindValue(':area_atuacao', $dados['area_atuacao']);
+    $stmt->bindValue(':email', $dados['email']);
+    $stmt->bindValue(':telefone', $dados['telefone']);
+    $stmt->bindValue(':website', $dados['website']);
+    $stmt->bindValue(':pessoa_contacto', $dados['pessoa_contacto']);
+    $stmt->bindValue(':tel_pessoa', $dados['tel_pessoa']);
+    $stmt->bindValue(':morada', $dados['morada']);
+    $stmt->bindValue(':contrato_ativo', $dados['contrato_ativo']);
+    $stmt->bindValue(':relacao_hospital', $dados['relacao_hospital']);
+    $stmt->bindValue(':prioridade_contacto', $dados['prioridade_contacto']);
+    $stmt->bindValue(':observacoes', $dados['observacoes']);
+    $stmt->execute();
+
+    return $pdo->lastInsertId();
+}
+
+
+// =====================================================
+// FORNECEDORES — ATUALIZAÇÃO
+// =====================================================
+
+function atualizar_fornecedor($pdo, $id_fornecedor, $dados)
+{
+    $sql = "UPDATE fornecedores
+            SET nome_empresa = :nome_empresa,
+                nif = :nif,
+                estado = :estado,
+                tipo_fornecedor = :tipo_fornecedor,
+                area_atuacao = :area_atuacao,
+                email = :email,
+                telefone = :telefone,
+                website = :website,
+                pessoa_contacto = :pessoa_contacto,
+                tel_pessoa = :tel_pessoa,
+                morada = :morada,
+                contrato_ativo = :contrato_ativo,
+                relacao_hospital = :relacao_hospital,
+                prioridade_contacto = :prioridade_contacto,
+                observacoes = :observacoes
+            WHERE id_fornecedor = :id_fornecedor";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindValue(':nome_empresa', $dados['nome_empresa']);
+    $stmt->bindValue(':nif', $dados['nif']);
+    $stmt->bindValue(':estado', $dados['estado']);
+    $stmt->bindValue(':tipo_fornecedor', $dados['tipo_fornecedor']);
+    $stmt->bindValue(':area_atuacao', $dados['area_atuacao']);
+    $stmt->bindValue(':email', $dados['email']);
+    $stmt->bindValue(':telefone', $dados['telefone']);
+    $stmt->bindValue(':website', $dados['website']);
+    $stmt->bindValue(':pessoa_contacto', $dados['pessoa_contacto']);
+    $stmt->bindValue(':tel_pessoa', $dados['tel_pessoa']);
+    $stmt->bindValue(':morada', $dados['morada']);
+    $stmt->bindValue(':contrato_ativo', $dados['contrato_ativo']);
+    $stmt->bindValue(':relacao_hospital', $dados['relacao_hospital']);
+    $stmt->bindValue(':prioridade_contacto', $dados['prioridade_contacto']);
+    $stmt->bindValue(':observacoes', $dados['observacoes']);
+    $stmt->bindValue(':id_fornecedor', $id_fornecedor, PDO::PARAM_INT);
+
+    return $stmt->execute();
+}
+
+
+// =====================================================
+// FORNECEDORES — FORMULÁRIOS E VALIDAÇÃO
+// =====================================================
+
+function recolher_dados_fornecedor_post()
+{
+    return [
+        'nome_empresa' => limpar_texto($_POST['nome_empresa'] ?? ''),
+        'nif' => limpar_texto($_POST['nif'] ?? ''),
+        'estado' => limpar_texto($_POST['estado'] ?? 'Ativo'),
+        'tipo_fornecedor' => limpar_texto($_POST['tipo_fornecedor'] ?? ''),
+        'area_atuacao' => limpar_texto($_POST['area_atuacao'] ?? 'Outro'),
+        'email' => limpar_texto($_POST['email'] ?? ''),
+        'telefone' => limpar_texto($_POST['telefone'] ?? ''),
+        'website' => limpar_texto($_POST['website'] ?? ''),
+        'pessoa_contacto' => limpar_texto($_POST['pessoa_contacto'] ?? ''),
+        'tel_pessoa' => limpar_texto($_POST['tel_pessoa'] ?? ''),
+        'morada' => limpar_texto($_POST['morada'] ?? ''),
+        'contrato_ativo' => limpar_texto($_POST['contrato_ativo'] ?? 'Não'),
+        'relacao_hospital' => limpar_texto($_POST['relacao_hospital'] ?? ''),
+        'prioridade_contacto' => limpar_texto($_POST['prioridade_contacto'] ?? 'Normal'),
+        'observacoes' => limpar_texto($_POST['observacoes'] ?? '')
+    ];
+}
+
+function validar_dados_fornecedor($dados)
+{
+    $campos_obrigatorios = [
+        'nome_empresa',
+        'nif',
+        'estado',
+        'tipo_fornecedor',
+        'area_atuacao',
+        'email'
+    ];
+
+    foreach ($campos_obrigatorios as $campo) {
+        if (empty($dados[$campo])) {
+            return false;
+        }
+    }
+
+    if (!preg_match('/^[0-9]{9}$/', $dados['nif'])) {
+        return false;
+    }
+
+    if (!filter_var($dados['email'], FILTER_VALIDATE_EMAIL)) {
+        return false;
+    }
+
+    if (!empty($dados['telefone']) && !preg_match('/^[0-9]{9}$/', $dados['telefone'])) {
+        return false;
+    }
+
+    if (!empty($dados['tel_pessoa']) && !preg_match('/^[0-9]{9}$/', $dados['tel_pessoa'])) {
+        return false;
+    }
+
+    return true;
+}

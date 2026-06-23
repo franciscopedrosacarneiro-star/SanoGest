@@ -1,8 +1,36 @@
 <?php
 
 require_once __DIR__ . '/../../includes/funcoes.php';
+require_once __DIR__ . '/../../includes/database.php';
 
 redirect_if_not_logged();
+
+$id_fornecedor = $_GET['id_fornecedor'] ?? null;
+
+if (!validar_id($id_fornecedor)) {
+    redirecionar('fornecedores.php');
+}
+
+$fornecedor = buscar_fornecedor_por_id($pdo, $id_fornecedor);
+
+if (!$fornecedor) {
+    redirecionar('fornecedores.php');
+}
+
+if (fornecedor_inativo($fornecedor)) {
+    redirecionar('fornecedores.php');
+}
+
+$erro = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    try {
+        inativar_fornecedor($pdo, $id_fornecedor);
+        redirecionar('fornecedores.php');
+    } catch (PDOException $e) {
+        $erro = 'Não foi possível inativar o fornecedor.';
+    }
+}
 
 ?>
 <!DOCTYPE html>
@@ -80,15 +108,18 @@ redirect_if_not_logged();
             <i class="fa-solid fa-triangle-exclamation fa-4x"></i>
         </div>
 
-        <h2 class="text-danger mb-3">Confirmar Remoção</h2>
+        <h2 class="text-danger mb-3">Confirmar Inativação</h2>
            <p class="mb-4">
-            Tem a certeza que pretende remover permanentemente o Fornecedor <strong>[Nome do Fornecedor]</strong>?<br>
-            Esta ação é irreversível e irá remover todos os registos associados a este ativo.
+            Tem a certeza que pretende inativar o fornecedor
+               <strong><?= htmlspecialchars($fornecedor->nome_empresa ?? '') ?></strong>?<br>
+               O fornecedor continuará guardado, mas deixará de poder ser editado ou associado a novos equipamentos.
            </p>
+           <form method="post">
                  <div class="d-flex justify-content-center gap-3">
-                <a href="fornecedores.html" class="btn btn-secondary px-4">Cancelar</a>
-                <button type="submit" class="btn btn-danger px-4">Sim, Remover Fornecedor</button>
+                <a href="fornecedores.php" class="btn btn-secondary px-4">Cancelar</a>
+                <button type="submit" class="btn btn-danger px-4">Sim, Inativar Fornecedor</button>
             </div>
+           </form>
            </div>
         </div>
         </main>
@@ -97,4 +128,4 @@ redirect_if_not_logged();
     <script src="../../../assets/js/bootstrap.bundle.min.js"></script>
     
 </body>
-</html>
+</html> 

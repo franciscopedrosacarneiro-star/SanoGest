@@ -1,8 +1,42 @@
 <?php
 
 require_once __DIR__ . '/../../includes/funcoes.php';
+require_once __DIR__ . '/../../includes/database.php';
 
 redirect_if_not_logged();
+
+$id_fornecedor = $_GET['id_fornecedor'] ?? $_POST['id_fornecedor'] ?? null;
+
+if (!validar_id($id_fornecedor)) {
+    redirecionar('fornecedores.php');
+}
+
+$fornecedor = buscar_fornecedor_por_id($pdo, $id_fornecedor);
+
+if (!$fornecedor) {
+    redirecionar('fornecedores.php');
+}
+
+if (fornecedor_inativo($fornecedor)) {
+    redirecionar('fornecedores.php');
+}
+
+$erro = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $dados = recolher_dados_fornecedor_post();
+
+    if (!validar_dados_fornecedor($dados)) {
+        $erro = 'Preenche corretamente todos os campos obrigatórios.';
+    } else {
+        try {
+            atualizar_fornecedor($pdo, $id_fornecedor, $dados);
+            redirecionar('fornecedores.php');
+        } catch (PDOException $e) {
+            $erro = 'Erro ao atualizar o fornecedor. Verifica se o NIF já existe noutro fornecedor.';
+        }
+    }
+}
 
 ?>
 <!DOCTYPE html>
@@ -69,7 +103,7 @@ redirect_if_not_logged();
         <div class="p-3">
             <h5 class="text-primary fw-bold mb-4">Módulos</h5>
             <ul class="nav nav-pills flex-column mb-auto">
-                <li><a href="fornecedores.html" class="nav-link text-dark"><i class="fa-solid fa-truck-medical me-2"></i>Fornecedores</a></li>
+                <li><a href="fornecedores.php" class="nav-link text-dark"><i class="fa-solid fa-truck-medical me-2"></i>Fornecedores</a></li>
             </ul>
         </div>
     </nav>
@@ -92,7 +126,8 @@ redirect_if_not_logged();
             </a>
         </div>
 
-        <form id="formEditarFornecedor" action="fornecedores.html" method="post">
+        <form id="formEditarFornecedor" action="editar.php?id_fornecedor=<?= htmlspecialchars($fornecedor->id_fornecedor) ?>" method="post">
+    <input type="hidden" name="id_fornecedor" value="<?= htmlspecialchars($fornecedor->id_fornecedor) ?>">
 
             <!-- Indicador dos passos -->
             <ul class="nav nav-pills nav-fill mb-4">
@@ -143,7 +178,7 @@ redirect_if_not_logged();
                                     type="text" 
                                     class="form-control" 
                                     name="nome_empresa" 
-                                    value="Siemens Healthineers"
+                                    value="<?= htmlspecialchars($fornecedor->nome_empresa ?? '') ?>"
                                     pattern="[A-Za-z0-9À-ÿ\s\.\-&]+"
                                     title="O nome da empresa só pode conter letras, números, espaços, pontos, hífen e &."
                                     minlength="3"
@@ -158,7 +193,7 @@ redirect_if_not_logged();
                                     type="text" 
                                     class="form-control" 
                                     name="nif" 
-                                    value="500123456"
+                                    value="<?= htmlspecialchars($fornecedor->nif ?? '') ?>"
                                     pattern="[0-9]{9}"
                                     title="O NIF deve conter exatamente 9 números."
                                     required
@@ -220,7 +255,7 @@ redirect_if_not_logged();
                                     type="email" 
                                     class="form-control" 
                                     name="email" 
-                                    value="geral@siemens.pt"
+                                    value="<?= htmlspecialchars($fornecedor->email ?? '') ?>"
                                     required
                                 >
                             </div>
@@ -231,7 +266,7 @@ redirect_if_not_logged();
                                     type="tel" 
                                     class="form-control" 
                                     name="telefone" 
-                                    value="210000000"
+                                    value="<?= htmlspecialchars($fornecedor->telefone ?? '') ?>"
                                     pattern="[0-9]{9}"
                                     title="O telefone deve conter exatamente 9 dígitos."
                                 >
@@ -254,7 +289,7 @@ redirect_if_not_logged();
                                     type="text" 
                                     class="form-control" 
                                     name="pessoa_contacto" 
-                                    value="Ana Martins"
+                                    value="<?= htmlspecialchars($fornecedor->pessoa_contacto ?? '') ?>"
                                     pattern="[A-Za-zÀ-ÿ\s]+"
                                     title="A pessoa de contacto deve conter apenas letras e espaços."
                                     maxlength="80"
@@ -267,7 +302,7 @@ redirect_if_not_logged();
                                     type="tel" 
                                     class="form-control" 
                                     name="tel_pessoa" 
-                                    value="910000000"
+                                    value="<?= htmlspecialchars($fornecedor->tel_pessoa ?? '') ?>"
                                     pattern="[0-9]{9}"
                                     title="O telefone deve conter exatamente 9 dígitos."
                                 >
@@ -295,7 +330,7 @@ redirect_if_not_logged();
                                     type="text" 
                                     class="form-control" 
                                     name="morada" 
-                                    value="Av. da Liberdade, Lisboa"
+                                    value="<?= htmlspecialchars($fornecedor->morada ?? '') ?>"
                                     pattern="[A-Za-z0-9À-ÿ\s\.\,\-ºª]+"
                                     title="A morada só pode conter letras, números, espaços, vírgulas, pontos, hífen, º e ª."
                                     maxlength="120"
@@ -305,8 +340,7 @@ redirect_if_not_logged();
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">Contrato Ativo</label>
                                 <select class="form-select" name="contrato_ativo">
-                                    <option selected>Sim</option>
-                                    <option>Não</option>
+                                    <option <?= selecionado($fornecedor->estado ?? '', 'Ativo') ?>>Ativo</option>
                                 </select>
                             </div>
 
@@ -410,5 +444,5 @@ redirect_if_not_logged();
     
     <script src="../../../assets/js/bootstrap.bundle.min.js"></script>
     <script src="../../../assets/js/1240881.js"></script>
-</body>
+</body> 
 </html>

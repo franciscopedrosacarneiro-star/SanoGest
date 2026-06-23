@@ -60,7 +60,7 @@ redirect_if_not_logged();
                 </li>
                 
             </ul>
-        </div>
+        </div> 
         
     </div>
 </nav>

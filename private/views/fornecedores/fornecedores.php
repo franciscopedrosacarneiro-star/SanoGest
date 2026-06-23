@@ -1,8 +1,18 @@
+
 <?php
 
 require_once __DIR__ . '/../../includes/funcoes.php';
+require_once __DIR__ . '/../../includes/database.php';
+
 
 redirect_if_not_logged();
+$fornecedores = listar_fornecedores($pdo);
+$estatisticas = calcular_estatisticas_fornecedores($fornecedores);
+
+$totalFornecedores = $estatisticas['total'];
+$totalAtivos = $estatisticas['ativos'];
+$totalInativos = $estatisticas['inativos'];
+$totalContratoAtivo = $estatisticas['contrato_ativo'];
 
 ?>
 <!DOCTYPE html>
@@ -68,14 +78,14 @@ redirect_if_not_logged();
         <div class="p-3">
             
             <ul class="nav nav-pills flex-column mb-auto">
-                <li><a href="../dashboard/dashboard.html" class="nav-link text-dark"><i class="fa-solid fa-gauge me-2"></i>Dashboard</a></li>
-                <li><a href="../equipamentos/equipamentos.html" class="nav-link text-dark"><i class="fa-solid fa-microchip me-2"></i>Equipamentos</a></li>
-                <li><a href="../fornecedores/fornecedores.html" class="nav-link text-dark"><i class="fa-solid fa-truck-medical me-2"></i>Fornecedores</a></li>
-                <li><a href="../localizacoes/localizacoes.html" class="nav-link text-dark"><i class="fa-solid fa-map-location-dot me-2"></i>Localizações</a></li>
-                <li><a href="../garantias/garantias.html" class="nav-link text-dark"><i class="fa-solid fa-shield-halved me-2"></i>Garantias</a></li>
-                <li><a href="../documentacao/documentacao.html" class="nav-link text-dark"><i class="fa-solid fa-file-contract me-2"></i>Documentação</a></li>
+                <li><a href="../dashboard/dashboard.php" class="nav-link text-dark"><i class="fa-solid fa-gauge me-2"></i>Dashboard</a></li>
+                <li><a href="../equipamentos/equipamentos.php" class="nav-link text-dark"><i class="fa-solid fa-microchip me-2"></i>Equipamentos</a></li>
+                <li><a href="../fornecedores/fornecedores.php" class="nav-link text-dark"><i class="fa-solid fa-truck-medical me-2"></i>Fornecedores</a></li>
+                <li><a href="../localizacoes/localizacoes.php" class="nav-link text-dark"><i class="fa-solid fa-map-location-dot me-2"></i>Localizações</a></li>
+                <li><a href="../garantias/garantias.php" class="nav-link text-dark"><i class="fa-solid fa-shield-halved me-2"></i>Garantias</a></li>
+                <li><a href="../documentacao/documentacao.php" class="nav-link text-dark"><i class="fa-solid fa-file-contract me-2"></i>Documentação</a></li>
                 <li>
-                    <a href="../editar/editar-index.html" class="nav-link active">
+                    <a href="../editar/editar-index.php" class="nav-link active">
                         <i class="fa-solid fa-pen-to-square me-2"></i>Editar Página Pública
                     </a>
                 </li>
@@ -96,7 +106,7 @@ redirect_if_not_logged();
                 </p>
             </div>
 
-            <a href="novo.html" class="btn btn-primary">
+            <a href="novo.php" class="btn btn-primary">
                 <i class="fa-solid fa-plus me-2"></i>Novo Fornecedor
             </a>
         </div>
@@ -108,7 +118,7 @@ redirect_if_not_logged();
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <h6 class="text-muted">Total</h6>
-                            <h3 class="fw-bold mb-0">6</h3>
+                            <h3 class="fw-bold mb-0"><?= $totalFornecedores ?></h3>
                         </div>
                         <i class="fa-solid fa-building text-primary fs-2"></i>
                     </div>
@@ -120,8 +130,8 @@ redirect_if_not_logged();
                 <div class="card p-3 shadow-sm border-0 border-start border-success border-5 h-100">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-muted">Fabricantes</h6>
-                            <h3 class="fw-bold mb-0">2</h3>
+                            <h6 class="text-muted">Ativos</h6>
+                            <h3 class="fw-bold mb-0"><?= $totalAtivos ?></h3>
                         </div>
                         <i class="fa-solid fa-industry text-success fs-2"></i>
                     </div>
@@ -133,8 +143,8 @@ redirect_if_not_logged();
                 <div class="card p-3 shadow-sm border-0 border-start border-warning border-5 h-100">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-muted">Assistência</h6>
-                            <h3 class="fw-bold mb-0">2</h3>
+                            <h6 class="text-muted">Inativos</h6>
+                            <h3 class="fw-bold mb-0"><?= $totalInativos ?></h3>
                         </div>
                         <i class="fa-solid fa-screwdriver-wrench text-warning fs-2"></i>
                     </div>
@@ -146,8 +156,8 @@ redirect_if_not_logged();
                 <div class="card p-3 shadow-sm border-0 border-start border-info border-5 h-100">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-muted">Associados</h6>
-                            <h3 class="fw-bold mb-0">14</h3>
+                            <h6 class="text-muted">Contratos Ativos</h6>
+                            <h3 class="fw-bold mb-0"><?= $totalContratoAtivo ?></h3>
                         </div>
                         <i class="fa-solid fa-link text-info fs-2"></i>
                     </div>
@@ -221,123 +231,93 @@ redirect_if_not_logged();
                             <th class="text-end">Ações</th>
                         </tr>
                     </thead>
+<tbody>
+    <?php if (empty($fornecedores)): ?>
+        <tr>
+            <td colspan="9" class="text-center text-muted py-4">
+                <i class="fa-solid fa-circle-info me-2"></i>
+                Não existem fornecedores registados.
+            </td>
+        </tr>
+    <?php else: ?>
+        <?php foreach ($fornecedores as $fornecedor): ?>
+            <tr 
+                data-tipo="<?= htmlspecialchars($fornecedor->tipo_fornecedor ?? '') ?>" 
+                data-estado="<?= htmlspecialchars($fornecedor->estado ?? '') ?>"
+            >
+                <td class="fw-bold">
+                    <?= htmlspecialchars($fornecedor->nome_empresa ?? '') ?>
+                </td>
 
-                    <tbody>
-                        <tr data-tipo="Fabricante" data-estado="Ativo">
-                            <td class="fw-bold">Siemens Healthineers</td>
-                            <td>500123456</td>
-                            <td><span class="badge bg-primary">Fabricante</span></td>
-                            <td>geral@siemens.pt</td>
-                            <td>220000001</td>
-                            <td>Ana Martins</td>
-                            <td>4</td>
-                            <td><span class="badge bg-success">Ativo</span></td>
-                            <td class="text-end">
-                                
-                                <a href="editar.html" class="btn btn-sm btn-outline-warning" title="Editar">
-                                    <i class="fa-solid fa-pen"></i>
-                                </a>
-                                <a href="apagar.html" class="btn btn-sm btn-outline-danger" title="Remover">
-                                    <i class="fa-solid fa-trash"></i>
-                                </a>
-                                <a href="associar.html" class="btn btn-sm btn-outline-primary" title="Associar Fornecedor">
-                                    <i class="fa-solid fa-link"></i>
-                                </a>
-                            </td>
-                        </tr>
+                <td>
+                    <?= htmlspecialchars($fornecedor->nif ?? '') ?>
+                </td>
 
-                        <tr data-tipo="Assistência Técnica" data-estado="Ativo">
-                            <td class="fw-bold">Dräger Portugal</td>
-                            <td>501987654</td>
-                            <td><span class="badge bg-warning text-dark">Assistência Técnica</span></td>
-                            <td>assistencia@draeger.pt</td>
-                            <td>220000002</td>
-                            <td>João Pereira</td>
-                            <td>3</td>
-                            <td><span class="badge bg-success">Ativo</span></td>
-                            <td class="text-end">
-                        
-                                <a href="editar.html" class="btn btn-sm btn-outline-warning" title="Editar">
-                                    <i class="fa-solid fa-pen"></i>
-                                </a>
-                                <a href="apagar.html" class="btn btn-sm btn-outline-danger" title="Remover">
-                                    <i class="fa-solid fa-trash"></i>
-                                </a>
-                                <a href="associar.html" class="btn btn-sm btn-outline-primary" title="Associar Fornecedor">
-                                    <i class="fa-solid fa-link"></i>
-                                </a>
-                            </td>
-                        </tr>
+                <td>
+                    <span class="badge bg-primary">
+                        <?= htmlspecialchars($fornecedor->tipo_fornecedor ?? '') ?>
+                    </span>
+                </td>
 
-                        <tr data-tipo="Distribuidor" data-estado="Ativo">
-                            <td class="fw-bold">Philips Healthcare Portugal</td>
-                            <td>502456789</td>
-                            <td><span class="badge bg-info text-dark">Distribuidor</span></td>
-                            <td>comercial@philips.pt</td>
-                            <td>220000003</td>
-                            <td>Carla Sousa</td>
-                            <td>2</td>
-                            <td><span class="badge bg-success">Ativo</span></td>
-                            <td class="text-end">
-                                
-                                <a href="editar.html" class="btn btn-sm btn-outline-warning" title="Editar">
-                                    <i class="fa-solid fa-pen"></i>
-                                </a>
-                                <a href="apagar.html" class="btn btn-sm btn-outline-danger" title="Remover">
-                                    <i class="fa-solid fa-trash"></i>
-                                </a>
-                                <a href="associar.html" class="btn btn-sm btn-outline-primary" title="Associar Fornecedor">
-                                    <i class="fa-solid fa-link"></i>
-                                </a>
-                            </td>
-                        </tr>
+                <td>
+                    <?= htmlspecialchars($fornecedor->email ?? '') ?>
+                </td>
 
-                        <tr data-tipo="Consumíveis/Acessórios" data-estado="Ativo">
-                            <td class="fw-bold">MedConsumíveis Norte</td>
-                            <td>503654321</td>
-                            <td><span class="badge bg-secondary">Consumíveis/Acessórios</span></td>
-                            <td>geral@medconsumiveis.pt</td>
-                            <td>220000004</td>
-                            <td>Rui Almeida</td>
-                            <td>5</td>
-                            <td><span class="badge bg-success">Ativo</span></td>
-                            <td class="text-end">
-                                
-                                <a href="editar.html" class="btn btn-sm btn-outline-warning" title="Editar">
-                                    <i class="fa-solid fa-pen"></i>
-                                </a>
-                                <a href="apagar.html" class="btn btn-sm btn-outline-danger" title="Remover">
-                                    <i class="fa-solid fa-trash"></i>
-                                </a>
-                                <a href="associar.html" class="btn btn-sm btn-outline-primary" title="Associar Fornecedor">
-                                    <i class="fa-solid fa-link"></i>
-                                </a>
-                            </td>
-                        </tr>
+                <td>
+                    <?= htmlspecialchars($fornecedor->telefone ?? '—') ?>
+                </td>
 
-                        <tr data-tipo="Assistência Técnica" data-estado="Inativo">
-                            <td class="fw-bold">TecMed Assistência</td>
-                            <td>504111222</td>
-                            <td><span class="badge bg-warning text-dark">Assistência Técnica</span></td>
-                            <td>suporte@tecmed.pt</td>
-                            <td>220000005</td>
-                            <td>Mariana Costa</td>
-                            <td>0</td>
-                            <td><span class="badge bg-secondary">Inativo</span></td>
-                            <td class="text-end">
-                                
-                                <a href="editar.html" class="btn btn-sm btn-outline-warning" title="Editar">
-                                    <i class="fa-solid fa-pen"></i>
-                                </a>
-                                <a href="apagar.html" class="btn btn-sm btn-outline-danger" title="Remover">
-                                    <i class="fa-solid fa-trash"></i>
-                                </a>
-                                <a href="associar.html" class="btn btn-sm btn-outline-primary" title="Associar Fornecedor">
-                                    <i class="fa-solid fa-link"></i>
-                                </a>
-                            </td>
-                        </tr>
-                    </tbody>
+                <td>
+                    <?= htmlspecialchars($fornecedor->pessoa_contacto ?? '—') ?>
+                </td>
+
+                <td>
+                    <?= htmlspecialchars($fornecedor->total_equipamentos_associados ?? 0) ?>
+                </td>
+
+                <td>
+                    <span class="badge bg-<?= badge_estado_fornecedor($fornecedor->estado ?? '') ?>">
+                        <?= htmlspecialchars($fornecedor->estado ?? '') ?>
+                    </span>
+                </td>
+
+                <td class="text-end">
+                    <?php if (!fornecedor_inativo($fornecedor)): ?>
+                        <a href="editar.php?id_fornecedor=<?= $fornecedor->id_fornecedor ?>" 
+                           class="btn btn-sm btn-outline-warning" 
+                           title="Editar">
+                            <i class="fa-solid fa-pen"></i>
+                        </a>
+
+                        <a href="apagar.php?id_fornecedor=<?= $fornecedor->id_fornecedor ?>" 
+                           class="btn btn-sm btn-outline-danger" 
+                           title="Inativar">
+                            <i class="fa-solid fa-ban"></i>
+                        </a>
+
+                        <a href="associar.php?id_fornecedor=<?= $fornecedor->id_fornecedor ?>" 
+                           class="btn btn-sm btn-outline-primary" 
+                           title="Associar Fornecedor">
+                            <i class="fa-solid fa-link"></i>
+                        </a>
+                    <?php else: ?>
+                        <button class="btn btn-sm btn-outline-secondary" disabled title="Fornecedor inativo">
+                            <i class="fa-solid fa-pen-slash"></i>
+                        </button>
+
+                        <button class="btn btn-sm btn-outline-secondary" disabled title="Já se encontra inativo">
+                            <i class="fa-solid fa-ban"></i>
+                        </button>
+
+                        <button class="btn btn-sm btn-outline-secondary" disabled title="Fornecedor inativo">
+                            <i class="fa-solid fa-link-slash"></i>
+                        </button>
+                    <?php endif; ?>
+                </td>
+            </tr>
+        <?php endforeach; ?>
+    <?php endif; ?>
+</tbody>
                 </table>
             </div>
 
