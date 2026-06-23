@@ -145,9 +145,15 @@ function badge_criticidade_equipamento($criticidade)
                     <i class="fa-solid fa-arrow-left me-2"></i>Voltar
                 </a>
 
-                <a href="editar.php?id_equipamento=<?= $equipamento->id_equipamento ?>" class="btn btn-warning">
-                    <i class="fa-solid fa-pen me-2"></i>Editar
-                </a>
+               <?php if (($equipamento->estado ?? '') !== 'Abatido'): ?>
+    <a href="editar.php?id_equipamento=<?= $equipamento->id_equipamento ?>" class="btn btn-warning">
+        <i class="fa-solid fa-pen me-2"></i>Editar
+    </a>
+<?php else: ?>
+    <button class="btn btn-secondary" disabled>
+        <i class="fa-solid fa-ban me-2"></i>Equipamento Abatido
+    </button>
+    <?php endif; ?>
             </div>
         </div>
 

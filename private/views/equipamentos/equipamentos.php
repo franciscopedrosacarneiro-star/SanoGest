@@ -311,25 +311,37 @@ function badge_criticidade_equipamento($criticidade)
                     </span>
                 </td>
 
-                <td class="text-end">
-                    <a href="consultar.php?id_equipamento=<?= $equipamento->id_equipamento ?>" 
+
+                 <td class="text-end">
+                 <a href="consultar.php?id_equipamento=<?= $equipamento->id_equipamento ?>" 
                        class="btn btn-sm btn-outline-info" 
-                       title="Consultar">
-                        <i class="fa-solid fa-eye"></i>
-                    </a>
+                          title="Consultar">
+                            <i class="fa-solid fa-eye"></i>
+                  </a>
 
-                    <a href="editar.php?id_equipamento=<?= $equipamento->id_equipamento ?>" 
-                       class="btn btn-sm btn-outline-warning" 
-                       title="Editar">
-                        <i class="fa-solid fa-pen"></i>
-                    </a>
+                       <?php if (($equipamento->estado ?? '') !== 'Abatido'): ?>
+                   <a href="editar.php?id_equipamento=<?= $equipamento->id_equipamento ?>" 
+                         class="btn btn-sm btn-outline-warning" 
+                          title="Editar">
+                      <i class="fa-solid fa-pen"></i>
+                     </a>
 
-                    <a href="apagar.php?id_equipamento=<?= $equipamento->id_equipamento ?>" 
-                       class="btn btn-sm btn-outline-danger" 
-                       title="Remover">
-                        <i class="fa-solid fa-trash"></i>
-                    </a>
-                </td>
+        <a href="apagar.php?id_equipamento=<?= $equipamento->id_equipamento ?>" 
+           class="btn btn-sm btn-outline-danger" 
+           title="Abater">
+            <i class="fa-solid fa-trash"></i>
+        </a>
+    <?php else: ?>
+        <button class="btn btn-sm btn-outline-secondary" disabled title="Equipamento abatido">
+            <i class="fa-solid fa-pen-slash"></i>
+        </button>
+
+        <button class="btn btn-sm btn-outline-secondary" disabled title="Já se encontra abatido">
+            <i class="fa-solid fa-ban"></i>
+        </button>
+    <?php endif; ?>
+</td>
+
             </tr>
         <?php endforeach; ?>
     <?php endif; ?>

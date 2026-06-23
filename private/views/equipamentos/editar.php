@@ -28,8 +28,8 @@ try {
     $equipamento = $stmt->fetch();
 }
 
-if (!$equipamento) {
-    header('Location: equipamentos.php');
+if (($equipamento->estado ?? '') === 'Abatido') {
+    header('Location: consultar.php?id_equipamento=' . $id_equipamento);
     exit;
 }
 

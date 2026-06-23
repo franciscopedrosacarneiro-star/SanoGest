@@ -26,15 +26,18 @@ $erro = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
-        $sql = "DELETE FROM equipamentos WHERE id_equipamento = :id_equipamento";
+        $sql = "UPDATE equipamentos
+                SET estado = 'Abatido'
+                WHERE id_equipamento = :id_equipamento";
+
         $stmt = $pdo->prepare($sql);
         $stmt->bindValue(':id_equipamento', $id_equipamento, PDO::PARAM_INT);
         $stmt->execute();
 
-        header('Location: equipamentos.php');
+        header('Location: consultar.php?id_equipamento=' . $id_equipamento);
         exit;
     } catch (PDOException $e) {
-        $erro = 'Não foi possível remover o equipamento, porque pode ter garantias, documentos ou manutenções associados.';
+        $erro = 'Não foi possível abater o equipamento.';
     }
 }
 
@@ -126,13 +129,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
 
         <p class="mb-4">
-            Tem a certeza que pretende remover permanentemente o equipamento
+            Tem a certeza que pretende abater o equipamento
             <strong>
                 <?= htmlspecialchars($equipamento->codigo_inventario) ?> -
                 <?= htmlspecialchars($equipamento->designacao) ?>
             </strong>?
             <br>
-            Esta ação é irreversível e poderá remover este ativo do inventário.
+            O equipamento continuará visível para consulta, mas deixará de poder ser editado.
         </p>
 
         <div class="card shadow-sm border-0 mb-4 text-start">
@@ -159,7 +162,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </a>
 
                 <button type="submit" class="btn btn-danger px-4">
-                    <i class="fa-solid fa-trash me-2"></i>Sim, Remover Equipamento
+                    <i class="fa-solid fa-trash me-2"></i>Sim, Abater Equipamento
                 </button>
             </div>
         </form>
