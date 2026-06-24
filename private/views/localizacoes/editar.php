@@ -109,45 +109,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <nav class="bg-white border-end shadow-sm sidebar-fixa">
         <div class="p-3">
             <ul class="nav nav-pills flex-column mb-auto">
-                <li>
-                    <a href="../dashboard/dashboard.php" class="nav-link text-dark">
-                        <i class="fa-solid fa-gauge me-2"></i>Dashboard
-                    </a>
-                </li>
-
-                <li>
-                    <a href="../equipamentos/equipamentos.php" class="nav-link text-dark">
-                        <i class="fa-solid fa-microchip me-2"></i>Equipamentos
-                    </a>
-                </li>
-
-                <li>
-                    <a href="../fornecedores/fornecedores.php" class="nav-link text-dark">
-                        <i class="fa-solid fa-truck-medical me-2"></i>Fornecedores
-                    </a>
-                </li>
+               
 
                 <li>
                     <a href="../localizacoes/localizacoes.php" class="nav-link text-dark">
                         <i class="fa-solid fa-map-location-dot me-2"></i>Localizações
-                    </a>
-                </li>
-
-                <li>
-                    <a href="../garantias/garantias.php" class="nav-link text-dark">
-                        <i class="fa-solid fa-shield-halved me-2"></i>Garantias
-                    </a>
-                </li>
-
-                <li>
-                    <a href="../documentacao/documentacao.php" class="nav-link text-dark">
-                        <i class="fa-solid fa-file-contract me-2"></i>Documentação
-                    </a>
-                </li>
-
-                <li>
-                    <a href="../editar/editar-index.php" class="nav-link active">
-                        <i class="fa-solid fa-pen-to-square me-2"></i>Editar Página Pública
                     </a>
                 </li>
             </ul>
