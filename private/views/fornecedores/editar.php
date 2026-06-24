@@ -129,6 +129,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <form id="formEditarFornecedor" action="editar.php?id_fornecedor=<?= htmlspecialchars($fornecedor->id_fornecedor) ?>" method="post">
     <input type="hidden" name="id_fornecedor" value="<?= htmlspecialchars($fornecedor->id_fornecedor) ?>">
 
+<?php if (!empty($erro)): ?>
+    <div class="alert alert-danger">
+        <i class="fa-solid fa-circle-exclamation me-2"></i>
+        <?= htmlspecialchars($erro) ?>
+    </div>
+<?php endif; ?>
+
             <!-- Indicador dos passos -->
             <ul class="nav nav-pills nav-fill mb-4">
                 <li class="nav-item">
@@ -211,27 +218,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Tipo de Fornecedor *</label>
-                                <select class="form-select" name="tipo_fornecedor" required>
-                                    <option value="">Selecione...</option>
-                                    <option selected>Fabricante</option>
-                                    <option>Distribuidor / Fornecedor Comercial</option>
-                                    <option>Empresa de Assistência Técnica</option>
-                                    <option>Fornecedor de Consumíveis/Acessórios</option>
-                                </select>
+                                
+<select class="form-select" name="tipo_fornecedor" required>
+    <option value="">Selecione...</option>
+    <option <?= selecionado($fornecedor->tipo_fornecedor ?? '', 'Fabricante') ?>>Fabricante</option>
+    <option <?= selecionado($fornecedor->tipo_fornecedor ?? '', 'Distribuidor / Fornecedor Comercial') ?>>Distribuidor / Fornecedor Comercial</option>
+    <option <?= selecionado($fornecedor->tipo_fornecedor ?? '', 'Empresa de Assistência Técnica') ?>>Empresa de Assistência Técnica</option>
+    <option <?= selecionado($fornecedor->tipo_fornecedor ?? '', 'Fornecedor de Consumíveis/Acessórios') ?>>Fornecedor de Consumíveis/Acessórios</option>
+</select>
+
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Área de Atuação</label>
-                                <select class="form-select" name="area_atuacao">
-                                    <option value="">Selecione...</option>
-                                    <option selected>Diagnóstico e Imagiologia</option>
-                                    <option>Monitorização</option>
-                                    <option>Suporte de Vida</option>
-                                    <option>Laboratório</option>
-                                    <option>Consumíveis Hospitalares</option>
-                                    <option>Assistência Técnica</option>
-                                    <option>Outro</option>
-                                </select>
+                                <select class="form-select" name="area_atuacao" required>
+    <option <?= selecionado($fornecedor->area_atuacao ?? '', 'Diagnóstico e Imagiologia') ?>>Diagnóstico e Imagiologia</option>
+    <option <?= selecionado($fornecedor->area_atuacao ?? '', 'Monitorização') ?>>Monitorização</option>
+    <option <?= selecionado($fornecedor->area_atuacao ?? '', 'Suporte de Vida') ?>>Suporte de Vida</option>
+    <option <?= selecionado($fornecedor->area_atuacao ?? '', 'Laboratório') ?>>Laboratório</option>
+    <option <?= selecionado($fornecedor->area_atuacao ?? '', 'Consumíveis Hospitalares') ?>>Consumíveis Hospitalares</option>
+    <option <?= selecionado($fornecedor->area_atuacao ?? '', 'Assistência Técnica') ?>>Assistência Técnica</option>
+    <option <?= selecionado($fornecedor->area_atuacao ?? '', 'Outro') ?>>Outro</option>
+</select>
                             </div>
 
                         </div>
@@ -279,7 +287,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     type="url" 
                                     class="form-control" 
                                     name="website" 
-                                    value="https://www.siemens.pt"
+                                   value="<?= htmlspecialchars($fornecedor->website ?? '') ?>"
                                 >
                             </div>
 
@@ -339,30 +347,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">Contrato Ativo</label>
-                                <select class="form-select" name="contrato_ativo">
-                                    <option <?= selecionado($fornecedor->estado ?? '', 'Ativo') ?>>Ativo</option>
-                                </select>
+                            
+<select class="form-select" name="contrato_ativo">
+    <option <?= selecionado($fornecedor->contrato_ativo ?? '', 'Sim') ?>>Sim</option>
+    <option <?= selecionado($fornecedor->contrato_ativo ?? '', 'Não') ?>>Não</option>
+</select>
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Tipo de Relação com o Hospital</label>
                                 <select class="form-select" name="relacao_hospital">
-                                    <option value="">Selecione...</option>
-                                    <option selected>Fornecedor principal</option>
-                                    <option>Fornecedor secundário</option>
-                                    <option>Prestador de assistência técnica</option>
-                                    <option>Fornecedor de consumíveis</option>
-                                    <option>Fabricante sem contrato direto</option>
-                                </select>
+    <option value="">Selecione...</option>
+    <option <?= selecionado($fornecedor->relacao_hospital ?? '', 'Fornecedor principal') ?>>Fornecedor principal</option>
+    <option <?= selecionado($fornecedor->relacao_hospital ?? '', 'Fornecedor secundário') ?>>Fornecedor secundário</option>
+    <option <?= selecionado($fornecedor->relacao_hospital ?? '', 'Prestador de assistência técnica') ?>>Prestador de assistência técnica</option>
+    <option <?= selecionado($fornecedor->relacao_hospital ?? '', 'Fornecedor de consumíveis') ?>>Fornecedor de consumíveis</option>
+    <option <?= selecionado($fornecedor->relacao_hospital ?? '', 'Fabricante sem contrato direto') ?>>Fabricante sem contrato direto</option>
+</select>
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Prioridade de Contacto</label>
                                 <select class="form-select" name="prioridade_contacto">
-                                    <option selected>Normal</option>
-                                    <option>Alta</option>
-                                    <option>Urgente</option>
-                                </select>
+    <option <?= selecionado($fornecedor->prioridade_contacto ?? '', 'Normal') ?>>Normal</option>
+    <option <?= selecionado($fornecedor->prioridade_contacto ?? '', 'Alta') ?>>Alta</option>
+    <option <?= selecionado($fornecedor->prioridade_contacto ?? '', 'Urgente') ?>>Urgente</option>
+</select>
                             </div>
 
                             <div class="col-md-4">
@@ -371,7 +381,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     type="number" 
                                     class="form-control" 
                                     name="equipamentos_associados" 
-                                    value="4"
+                                    value="<?= htmlspecialchars($fornecedor->total_equipamentos_associados ?? 0) ?>"
                                     min="0"
                                     readonly
                                 >
@@ -398,7 +408,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 name="observacoes" 
                                 rows="5"
                                 maxlength="500"
-                            >Fornecedor preferencial para equipamentos de diagnóstico.</textarea>
+                            ><?= htmlspecialchars($fornecedor->observacoes ?? '') ?></textarea>
                             <div class="form-text">Máximo de 500 caracteres.</div>
                         </div>
 
@@ -430,7 +440,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <i class="fa-solid fa-rotate-left me-2"></i>Repor Dados
                     </button>
 
-                    <button type="submit" class="btn btn-success px-4 d-none" id="btnGuardarEditarFornecedor">
+                    <button type="submit" class="btn btn-success px-4" id="btnGuardarEditarFornecedor">
                         <i class="fa-solid fa-floppy-disk me-2"></i>Guardar Alterações
                     </button>
                 </div>

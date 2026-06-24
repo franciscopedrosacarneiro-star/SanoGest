@@ -189,11 +189,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <div class="col-md-3">
                                     <label class="form-label fw-bold">Estado</label>
 
-                                    <input type="hidden" name="estado" value="Ativo">
+                                    <input type="hidden" name="estado" value="<?= htmlspecialchars($fornecedor->estado ?? 'Ativo') ?>">
 
-                                      <div class="form-control bg-light">
-                                            <span class="badge bg-success">Ativo</span>
-                                      </div>
+<div class="form-control bg-light">
+    <span class="badge bg-<?= badge_estado_fornecedor($fornecedor->estado ?? '') ?>">
+        <?= htmlspecialchars($fornecedor->estado ?? 'Ativo') ?>
+    </span>
+</div>
                              </div>
 
 

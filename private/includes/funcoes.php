@@ -62,6 +62,23 @@ function limpar_texto($valor)
     return trim(htmlspecialchars($valor ?? '', ENT_QUOTES, 'UTF-8'));
 }
 
+function valor_ou_null($valor)
+{
+    $valor = limpar_texto($valor);
+
+    return $valor !== '' ? $valor : null;
+}
+
+function bind_valor_ou_null($stmt, $parametro, $valor)
+{
+    if ($valor === null || $valor === '') {
+        $stmt->bindValue($parametro, null, PDO::PARAM_NULL);
+    } else {
+        $stmt->bindValue($parametro, $valor);
+    }
+}
+
+
 function redirecionar($pagina)
 {
     header('Location: ' . $pagina);
@@ -679,15 +696,15 @@ function criar_fornecedor($pdo, $dados)
     $stmt->bindValue(':tipo_fornecedor', $dados['tipo_fornecedor']);
     $stmt->bindValue(':area_atuacao', $dados['area_atuacao']);
     $stmt->bindValue(':email', $dados['email']);
-    $stmt->bindValue(':telefone', $dados['telefone']);
-    $stmt->bindValue(':website', $dados['website']);
-    $stmt->bindValue(':pessoa_contacto', $dados['pessoa_contacto']);
-    $stmt->bindValue(':tel_pessoa', $dados['tel_pessoa']);
-    $stmt->bindValue(':morada', $dados['morada']);
+    bind_valor_ou_null($stmt, ':telefone', $dados['telefone']);
+    bind_valor_ou_null($stmt, ':website', $dados['website']);
+    bind_valor_ou_null($stmt, ':pessoa_contacto', $dados['pessoa_contacto']);
+    bind_valor_ou_null($stmt, ':tel_pessoa', $dados['tel_pessoa']);
+    bind_valor_ou_null($stmt, ':morada', $dados['morada']);
     $stmt->bindValue(':contrato_ativo', $dados['contrato_ativo']);
-    $stmt->bindValue(':relacao_hospital', $dados['relacao_hospital']);
+    bind_valor_ou_null($stmt, ':relacao_hospital', $dados['relacao_hospital']);
     $stmt->bindValue(':prioridade_contacto', $dados['prioridade_contacto']);
-    $stmt->bindValue(':observacoes', $dados['observacoes']);
+    bind_valor_ou_null($stmt, ':observacoes', $dados['observacoes']);
     $stmt->execute();
 
     return $pdo->lastInsertId();
@@ -725,15 +742,15 @@ function atualizar_fornecedor($pdo, $id_fornecedor, $dados)
     $stmt->bindValue(':tipo_fornecedor', $dados['tipo_fornecedor']);
     $stmt->bindValue(':area_atuacao', $dados['area_atuacao']);
     $stmt->bindValue(':email', $dados['email']);
-    $stmt->bindValue(':telefone', $dados['telefone']);
-    $stmt->bindValue(':website', $dados['website']);
-    $stmt->bindValue(':pessoa_contacto', $dados['pessoa_contacto']);
-    $stmt->bindValue(':tel_pessoa', $dados['tel_pessoa']);
-    $stmt->bindValue(':morada', $dados['morada']);
+    bind_valor_ou_null($stmt, ':telefone', $dados['telefone']);
+     bind_valor_ou_null($stmt, ':website', $dados['website']);
+      bind_valor_ou_null($stmt, ':pessoa_contacto', $dados['pessoa_contacto']);
+       bind_valor_ou_null($stmt, ':tel_pessoa', $dados['tel_pessoa']);
+        bind_valor_ou_null($stmt, ':morada', $dados['morada']);
     $stmt->bindValue(':contrato_ativo', $dados['contrato_ativo']);
-    $stmt->bindValue(':relacao_hospital', $dados['relacao_hospital']);
+    bind_valor_ou_null($stmt, ':relacao_hospital', $dados['relacao_hospital']);
     $stmt->bindValue(':prioridade_contacto', $dados['prioridade_contacto']);
-    $stmt->bindValue(':observacoes', $dados['observacoes']);
+    bind_valor_ou_null($stmt, ':observacoes', $dados['observacoes']);
     $stmt->bindValue(':id_fornecedor', $id_fornecedor, PDO::PARAM_INT);
 
     return $stmt->execute();
@@ -744,6 +761,7 @@ function atualizar_fornecedor($pdo, $id_fornecedor, $dados)
 // FORNECEDORES — FORMULÁRIOS E VALIDAÇÃO
 // =====================================================
 
+
 function recolher_dados_fornecedor_post()
 {
     return [
@@ -753,17 +771,21 @@ function recolher_dados_fornecedor_post()
         'tipo_fornecedor' => limpar_texto($_POST['tipo_fornecedor'] ?? ''),
         'area_atuacao' => limpar_texto($_POST['area_atuacao'] ?? 'Outro'),
         'email' => limpar_texto($_POST['email'] ?? ''),
-        'telefone' => limpar_texto($_POST['telefone'] ?? ''),
-        'website' => limpar_texto($_POST['website'] ?? ''),
-        'pessoa_contacto' => limpar_texto($_POST['pessoa_contacto'] ?? ''),
-        'tel_pessoa' => limpar_texto($_POST['tel_pessoa'] ?? ''),
-        'morada' => limpar_texto($_POST['morada'] ?? ''),
+
+        'telefone' => valor_ou_null($_POST['telefone'] ?? ''),
+        'website' => valor_ou_null($_POST['website'] ?? ''),
+        'pessoa_contacto' => valor_ou_null($_POST['pessoa_contacto'] ?? ''),
+        'tel_pessoa' => valor_ou_null($_POST['tel_pessoa'] ?? ''),
+        'morada' => valor_ou_null($_POST['morada'] ?? ''),
+
         'contrato_ativo' => limpar_texto($_POST['contrato_ativo'] ?? 'Não'),
-        'relacao_hospital' => limpar_texto($_POST['relacao_hospital'] ?? ''),
+        'relacao_hospital' => valor_ou_null($_POST['relacao_hospital'] ?? ''),
         'prioridade_contacto' => limpar_texto($_POST['prioridade_contacto'] ?? 'Normal'),
-        'observacoes' => limpar_texto($_POST['observacoes'] ?? '')
+        'observacoes' => valor_ou_null($_POST['observacoes'] ?? '')
     ];
 }
+
+
 
 function validar_dados_fornecedor($dados)
 {
