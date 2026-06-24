@@ -914,3 +914,358 @@ function validar_dados_fornecedor($dados)
 
     return true;
 }
+// =====================================================
+// LOCALIZAÇÕES — BADGES / ESTADOS VISUAIS
+// =====================================================
+
+function badge_estado_localizacao($estado)
+{
+    return match ($estado) {
+        'Ativa' => 'success',
+        'Inativa' => 'secondary',
+        'Em obras' => 'warning text-dark',
+        'Indisponível' => 'danger',
+        default => 'secondary'
+    };
+}
+
+function badge_tipo_area_localizacao($tipo_area)
+{
+    return match ($tipo_area) {
+        'Área Crítica' => 'danger',
+        'Diagnóstico' => 'primary',
+        'Internamento' => 'success',
+        'Laboratório' => 'info text-dark',
+        'Armazém' => 'secondary',
+        'Administrativa' => 'dark',
+        'Outra' => 'secondary',
+        default => 'secondary'
+    };
+}
+
+function badge_prioridade_localizacao($prioridade)
+{
+    return match ($prioridade) {
+        'Normal' => 'secondary',
+        'Alta' => 'warning text-dark',
+        'Crítica' => 'danger',
+        default => 'secondary'
+    };
+}
+
+function localizacao_inativa($localizacao)
+{
+    return ($localizacao->estado ?? '') === 'Inativa';
+}
+
+
+// =====================================================
+// LOCALIZAÇÕES — LISTAGEM E CONSULTA
+// =====================================================
+
+function listar_localizacoes($pdo)
+{
+    $sql = "SELECT 
+                l.*,
+                COALESCE((
+                    SELECT COUNT(*)
+                    FROM equipamentos e
+                    WHERE e.id_localizacao = l.id_localizacao
+                    AND e.estado <> 'Abatido'
+                ), 0) AS total_equipamentos_associados
+            FROM localizacoes l
+            ORDER BY l.id_localizacao DESC";
+
+    $stmt = $pdo->query($sql);
+
+    return $stmt->fetchAll();
+}
+
+function buscar_localizacao_por_id($pdo, $id_localizacao)
+{
+    if (!validar_id($id_localizacao)) {
+        return false;
+    }
+
+    $sql = "SELECT 
+                l.*,
+                COALESCE((
+                    SELECT COUNT(*)
+                    FROM equipamentos e
+                    WHERE e.id_localizacao = l.id_localizacao
+                    AND e.estado <> 'Abatido'
+                ), 0) AS total_equipamentos_associados
+            FROM localizacoes l
+            WHERE l.id_localizacao = :id_localizacao
+            LIMIT 1";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindValue(':id_localizacao', $id_localizacao, PDO::PARAM_INT);
+    $stmt->execute();
+
+    return $stmt->fetch();
+}
+
+function buscar_equipamentos_da_localizacao($pdo, $id_localizacao)
+{
+    if (!validar_id($id_localizacao)) {
+        return [];
+    }
+
+    $sql = "SELECT 
+                id_equipamento,
+                codigo_inventario,
+                designacao,
+                marca,
+                modelo,
+                estado,
+                criticidade
+            FROM equipamentos
+            WHERE id_localizacao = :id_localizacao
+            AND estado <> 'Abatido'
+            ORDER BY designacao ASC";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindValue(':id_localizacao', $id_localizacao, PDO::PARAM_INT);
+    $stmt->execute();
+
+    return $stmt->fetchAll();
+}
+
+function calcular_estatisticas_localizacoes($localizacoes)
+{
+    $estatisticas = [
+        'total' => count($localizacoes),
+        'ativas' => 0,
+        'inativas' => 0,
+        'equipamentos_associados' => 0
+    ];
+
+    foreach ($localizacoes as $localizacao) {
+        if (($localizacao->estado ?? '') === 'Ativa') {
+            $estatisticas['ativas']++;
+        }
+
+        if (($localizacao->estado ?? '') === 'Inativa') {
+            $estatisticas['inativas']++;
+        }
+
+        $estatisticas['equipamentos_associados'] += (int) ($localizacao->total_equipamentos_associados ?? 0);
+    }
+
+    return $estatisticas;
+}
+
+
+// =====================================================
+// LOCALIZAÇÕES — CRIAÇÃO
+// =====================================================
+
+function criar_localizacao($pdo, $dados)
+{
+    $sql = "INSERT INTO localizacoes
+            (
+                edificio,
+                piso,
+                servico,
+                sala,
+                tipo_area,
+                estado,
+                capacidade_equipamentos,
+                acesso_restrito,
+                prioridade_tecnica,
+                observacoes
+            )
+            VALUES
+            (
+                :edificio,
+                :piso,
+                :servico,
+                :sala,
+                :tipo_area,
+                :estado,
+                :capacidade_equipamentos,
+                :acesso_restrito,
+                :prioridade_tecnica,
+                :observacoes
+            )";
+
+    $stmt = $pdo->prepare($sql);
+
+    $stmt->bindValue(':edificio', $dados['edificio']);
+    $stmt->bindValue(':piso', $dados['piso'], PDO::PARAM_INT);
+    $stmt->bindValue(':servico', $dados['servico']);
+    $stmt->bindValue(':sala', $dados['sala']);
+    $stmt->bindValue(':tipo_area', $dados['tipo_area']);
+    $stmt->bindValue(':estado', $dados['estado']);
+    $stmt->bindValue(':capacidade_equipamentos', $dados['capacidade_equipamentos'], PDO::PARAM_INT);
+    $stmt->bindValue(':acesso_restrito', $dados['acesso_restrito']);
+    $stmt->bindValue(':prioridade_tecnica', $dados['prioridade_tecnica']);
+    bind_valor_ou_null($stmt, ':observacoes', $dados['observacoes']);
+
+    $stmt->execute();
+
+    return $pdo->lastInsertId();
+}
+
+
+// =====================================================
+// LOCALIZAÇÕES — ATUALIZAÇÃO
+// =====================================================
+
+function atualizar_localizacao($pdo, $id_localizacao, $dados)
+{
+    if (!validar_id($id_localizacao)) {
+        return false;
+    }
+
+    $sql = "UPDATE localizacoes
+            SET edificio = :edificio,
+                piso = :piso,
+                servico = :servico,
+                sala = :sala,
+                tipo_area = :tipo_area,
+                estado = :estado,
+                capacidade_equipamentos = :capacidade_equipamentos,
+                acesso_restrito = :acesso_restrito,
+                prioridade_tecnica = :prioridade_tecnica,
+                observacoes = :observacoes
+            WHERE id_localizacao = :id_localizacao";
+
+    $stmt = $pdo->prepare($sql);
+
+    $stmt->bindValue(':edificio', $dados['edificio']);
+    $stmt->bindValue(':piso', $dados['piso'], PDO::PARAM_INT);
+    $stmt->bindValue(':servico', $dados['servico']);
+    $stmt->bindValue(':sala', $dados['sala']);
+    $stmt->bindValue(':tipo_area', $dados['tipo_area']);
+    $stmt->bindValue(':estado', $dados['estado']);
+    $stmt->bindValue(':capacidade_equipamentos', $dados['capacidade_equipamentos'], PDO::PARAM_INT);
+    $stmt->bindValue(':acesso_restrito', $dados['acesso_restrito']);
+    $stmt->bindValue(':prioridade_tecnica', $dados['prioridade_tecnica']);
+    bind_valor_ou_null($stmt, ':observacoes', $dados['observacoes']);
+
+    $stmt->bindValue(':id_localizacao', $id_localizacao, PDO::PARAM_INT);
+
+    return $stmt->execute();
+}
+
+
+// =====================================================
+// LOCALIZAÇÕES — INATIVAR / SOFT DELETE
+// =====================================================
+
+function inativar_localizacao($pdo, $id_localizacao)
+{
+    if (!validar_id($id_localizacao)) {
+        return false;
+    }
+
+    $sql = "UPDATE localizacoes
+            SET estado = 'Inativa'
+            WHERE id_localizacao = :id_localizacao";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindValue(':id_localizacao', $id_localizacao, PDO::PARAM_INT);
+
+    return $stmt->execute();
+}
+
+
+// =====================================================
+// LOCALIZAÇÕES — FORMULÁRIOS E VALIDAÇÃO
+// =====================================================
+
+function recolher_dados_localizacao_post()
+{
+    $capacidade = $_POST['capacidade_equipamentos'] ?? '';
+
+    return [
+        'edificio' => limpar_texto($_POST['edificio'] ?? ''),
+        'piso' => $_POST['piso'] ?? '',
+        'servico' => limpar_texto($_POST['servico'] ?? ''),
+        'sala' => limpar_texto($_POST['sala'] ?? ''),
+        'tipo_area' => limpar_texto($_POST['tipo_area'] ?? 'Outra'),
+        'estado' => limpar_texto($_POST['estado'] ?? 'Ativa'),
+        'capacidade_equipamentos' => $capacidade !== '' ? (int) $capacidade : 0,
+        'acesso_restrito' => limpar_texto($_POST['acesso_restrito'] ?? 'Não'),
+        'prioridade_tecnica' => limpar_texto($_POST['prioridade_tecnica'] ?? 'Normal'),
+        'observacoes' => valor_ou_null($_POST['observacoes'] ?? '')
+    ];
+}
+
+function validar_dados_localizacao($dados)
+{
+    $campos_obrigatorios = [
+        'edificio',
+        'piso',
+        'servico',
+        'sala',
+        'tipo_area',
+        'estado'
+    ];
+
+    foreach ($campos_obrigatorios as $campo) {
+        if (!isset($dados[$campo]) || $dados[$campo] === '') {
+            return false;
+        }
+    }
+
+    if (!is_numeric($dados['piso']) || (int) $dados['piso'] < 0 || (int) $dados['piso'] > 20) {
+        return false;
+    }
+
+    if (
+        !is_numeric($dados['capacidade_equipamentos']) ||
+        (int) $dados['capacidade_equipamentos'] < 0 ||
+        (int) $dados['capacidade_equipamentos'] > 200
+    ) {
+        return false;
+    }
+
+    $tipos_validos = [
+        'Área Crítica',
+        'Diagnóstico',
+        'Internamento',
+        'Laboratório',
+        'Armazém',
+        'Administrativa',
+        'Outra'
+    ];
+
+    if (!in_array($dados['tipo_area'], $tipos_validos, true)) {
+        return false;
+    }
+
+    $estados_validos = [
+        'Ativa',
+        'Inativa',
+        'Em obras',
+        'Indisponível'
+    ];
+
+    if (!in_array($dados['estado'], $estados_validos, true)) {
+        return false;
+    }
+
+    $acesso_validos = [
+        'Sim',
+        'Não'
+    ];
+
+    if (!in_array($dados['acesso_restrito'], $acesso_validos, true)) {
+        return false;
+    }
+
+    $prioridades_validas = [
+        'Normal',
+        'Alta',
+        'Crítica'
+    ];
+
+    if (!in_array($dados['prioridade_tecnica'], $prioridades_validas, true)) {
+        return false;
+    }
+
+    return true;
+}
