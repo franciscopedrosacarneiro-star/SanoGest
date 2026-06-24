@@ -10,9 +10,10 @@ $fornecedores = listar_fornecedores($pdo);
 $estatisticas = calcular_estatisticas_fornecedores($fornecedores);
 
 $totalFornecedores = $estatisticas['total'];
-$totalAtivos = $estatisticas['ativos'];
-$totalInativos = $estatisticas['inativos'];
-$totalContratoAtivo = $estatisticas['contrato_ativo'];
+$totalFabricantes = $estatisticas['fabricantes'];
+$totalAssistencia = $estatisticas['assistencia'];
+$totalEquipamentosAssociados = $estatisticas['equipamentos_associados'];
+
 
 ?>
 <!DOCTYPE html>
@@ -111,60 +112,61 @@ $totalContratoAtivo = $estatisticas['contrato_ativo'];
             </a>
         </div>
 
-        <!-- Cartões de resumo -->
-        <div class="row g-3 mb-4">
-            <div class="col-md-3">
-                <div class="card p-3 shadow-sm border-0 border-start border-primary border-5 h-100">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted">Total</h6>
-                            <h3 class="fw-bold mb-0"><?= $totalFornecedores ?></h3>
-                        </div>
-                        <i class="fa-solid fa-building text-primary fs-2"></i>
-                    </div>
-                    <small class="text-muted mt-2">Fornecedores registados</small>
+      
+<!-- Cartões de resumo -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card p-3 shadow-sm border-0 border-start border-primary border-5 h-100">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-muted">Total</h6>
+                    <h3 class="fw-bold mb-0"><?= $totalFornecedores ?></h3>
                 </div>
+                <i class="fa-solid fa-building text-primary fs-2"></i>
             </div>
-
-            <div class="col-md-3">
-                <div class="card p-3 shadow-sm border-0 border-start border-success border-5 h-100">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted">Ativos</h6>
-                            <h3 class="fw-bold mb-0"><?= $totalAtivos ?></h3>
-                        </div>
-                        <i class="fa-solid fa-industry text-success fs-2"></i>
-                    </div>
-                    <small class="text-muted mt-2">Fabricantes associados</small>
-                </div>
-            </div>
-
-            <div class="col-md-3">
-                <div class="card p-3 shadow-sm border-0 border-start border-warning border-5 h-100">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted">Inativos</h6>
-                            <h3 class="fw-bold mb-0"><?= $totalInativos ?></h3>
-                        </div>
-                        <i class="fa-solid fa-screwdriver-wrench text-warning fs-2"></i>
-                    </div>
-                    <small class="text-muted mt-2">Assistência técnica</small>
-                </div>
-            </div>
-
-            <div class="col-md-3">
-                <div class="card p-3 shadow-sm border-0 border-start border-info border-5 h-100">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted">Contratos Ativos</h6>
-                            <h3 class="fw-bold mb-0"><?= $totalContratoAtivo ?></h3>
-                        </div>
-                        <i class="fa-solid fa-link text-info fs-2"></i>
-                    </div>
-                    <small class="text-muted mt-2">Equipamentos associados</small>
-                </div>
-            </div>
+            <small class="text-muted mt-2">Fornecedores registados</small>
         </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card p-3 shadow-sm border-0 border-start border-success border-5 h-100">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-muted">Fabricantes</h6>
+                    <h3 class="fw-bold mb-0"><?= $totalFabricantes ?></h3>
+                </div>
+                <i class="fa-solid fa-industry text-success fs-2"></i>
+            </div>
+            <small class="text-muted mt-2">Fabricantes associados</small>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card p-3 shadow-sm border-0 border-start border-warning border-5 h-100">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-muted">Assistência</h6>
+                    <h3 class="fw-bold mb-0"><?= $totalAssistencia ?></h3>
+                </div>
+                <i class="fa-solid fa-screwdriver-wrench text-warning fs-2"></i>
+            </div>
+            <small class="text-muted mt-2">Assistência técnica</small>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card p-3 shadow-sm border-0 border-start border-info border-5 h-100">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-muted">Associados</h6>
+                    <h3 class="fw-bold mb-0"><?= $totalEquipamentosAssociados ?></h3>
+                </div>
+                <i class="fa-solid fa-link text-info fs-2"></i>
+            </div>
+            <small class="text-muted mt-2">Equipamentos associados</small>
+        </div>
+    </div>
+</div>
 
         <!-- Pesquisa e filtros -->
         <div class="card shadow-sm border-0 mb-4">
@@ -189,9 +191,9 @@ $totalContratoAtivo = $estatisticas['contrato_ativo'];
                         <select id="filtroTipoFornecedor" class="form-select">
                             <option value="">Todos</option>
                             <option value="Fabricante">Fabricante</option>
-                            <option value="Distribuidor">Distribuidor</option>
-                            <option value="Assistência Técnica">Assistência Técnica</option>
-                            <option value="Consumíveis/Acessórios">Consumíveis/Acessórios</option>
+                            <option value="Distribuidor / Fornecedor Comercial">Distribuidor / Fornecedor Comercial</option>
+                            <option value="Empresa de Assistência Técnica">Empresa de Assistência Técnica</option>
+                            <option value="Fornecedor de Consumíveis/Acessórios">Fornecedor de Consumíveis/Acessórios</option>
                         </select>
                     </div>
 
@@ -254,8 +256,8 @@ $totalContratoAtivo = $estatisticas['contrato_ativo'];
                 </td>
 
                 <td>
-                    <span class="badge bg-primary">
-                        <?= htmlspecialchars($fornecedor->tipo_fornecedor ?? '') ?>
+                    <span class="badge bg-<?= badge_tipo_fornecedor($fornecedor->tipo_fornecedor ?? '') ?>">
+                      <?= htmlspecialchars($fornecedor->tipo_fornecedor ?? '') ?>
                     </span>
                 </td>
 

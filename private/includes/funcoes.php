@@ -570,27 +570,38 @@ function buscar_fornecedor_por_id($pdo, $id_fornecedor)
     return $stmt->fetch();
 }
 
+function badge_tipo_fornecedor($tipo)
+{
+    return match ($tipo) {
+        'Fabricante' => 'success',
+        'Distribuidor / Fornecedor Comercial' => 'info text-dark',
+        'Empresa de Assistência Técnica' => 'warning text-dark',
+        'Fornecedor de Consumíveis/Acessórios' => 'secondary',
+        default => 'primary'
+    };
+}
+
 function calcular_estatisticas_fornecedores($fornecedores)
 {
     $estatisticas = [
         'total' => count($fornecedores),
-        'ativos' => 0,
-        'inativos' => 0,
-        'contrato_ativo' => 0
+        'fabricantes' => 0,
+        'assistencia' => 0,
+        'equipamentos_associados' => 0
     ];
 
     foreach ($fornecedores as $fornecedor) {
-        if (($fornecedor->estado ?? '') === 'Ativo') {
-            $estatisticas['ativos']++;
+        $tipo = $fornecedor->tipo_fornecedor ?? '';
+
+        if ($tipo === 'Fabricante') {
+            $estatisticas['fabricantes']++;
         }
 
-        if (($fornecedor->estado ?? '') === 'Inativo') {
-            $estatisticas['inativos']++;
+        if ($tipo === 'Empresa de Assistência Técnica') {
+            $estatisticas['assistencia']++;
         }
 
-        if (($fornecedor->contrato_ativo ?? '') === 'Sim') {
-            $estatisticas['contrato_ativo']++;
-        }
+        $estatisticas['equipamentos_associados'] += (int) ($fornecedor->total_equipamentos_associados ?? 0);
     }
 
     return $estatisticas;

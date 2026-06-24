@@ -80,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2" aria-labelledby="menuUtilizador">
                         <li>
-                            <a class="dropdown-item py-2" href="../../../private/views/perfil/alterar-senha.html">
+                            <a class="dropdown-item py-2" href="../../../private/views/perfil/alterar-senha.php">
                                 <i class="fa-solid fa-key me-2 text-muted"></i>Trocar palavra-passe
                             </a>
                         </li>
@@ -121,7 +121,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </p>
             </div>
 
-            <a href="fornecedores.html" class="btn btn-outline-secondary">
+            <a href="fornecedores.php" class="btn btn-outline-secondary">
                 <i class="fa-solid fa-arrow-left me-2"></i>Voltar
             </a>
         </div>
@@ -417,7 +417,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </button>
 
                 <div>
-                    <a href="fornecedores.html" class="btn btn-secondary me-2">
+                    <a href="fornecedores.php" class="btn btn-secondary me-2">
                         Cancelar
                     </a>
 

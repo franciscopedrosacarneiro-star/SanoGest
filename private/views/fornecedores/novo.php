@@ -1,8 +1,26 @@
 <?php
 
 require_once __DIR__ . '/../../includes/funcoes.php';
+require_once __DIR__ . '/../../includes/database.php';
 
 redirect_if_not_logged();
+
+$erro = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $dados = recolher_dados_fornecedor_post();
+
+    if (!validar_dados_fornecedor($dados)) {
+        $erro = 'Preenche corretamente todos os campos obrigatórios.';
+    } else {
+        try {
+            criar_fornecedor($pdo, $dados);
+            redirecionar('fornecedores.php');
+        } catch (PDOException $e) {
+            $erro = 'Erro ao guardar o fornecedor. Verifica se o NIF já existe.';
+        }
+    }
+}
 
 ?>
 <!DOCTYPE html>
@@ -10,7 +28,7 @@ redirect_if_not_logged();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SanoGest | Novo Equipamento</title>
+    <title>SanoGest | Novo Fornecedor</title>
     <link rel="stylesheet" href="../../../assets/css/bootstrap.min.css">
     <link rel="stylesheet" href="../../../assets/css/1240881.css">
     <link rel="stylesheet" href="../../../assets/fontawesome/all.min.css">
@@ -46,7 +64,7 @@ redirect_if_not_logged();
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2" aria-labelledby="menuUtilizador">
                         <li>
-                            <a class="dropdown-item py-2" href="../../../private/views/perfil/alterar-senha.html">
+                            <a class="dropdown-item py-2" href="../../../private/views/perfil/alterar-senha.php">
                                 <i class="fa-solid fa-key me-2 text-muted"></i>Trocar palavra-passe
                             </a>
                         </li>
@@ -69,7 +87,7 @@ redirect_if_not_logged();
         <div class="p-3">
             <h5 class="text-primary fw-bold mb-4">Módulos</h5>
             <ul class="nav nav-pills flex-column mb-auto">
-                <li><a href="../fornecedores/fornecedores.html" class="nav-link text-dark"><i class="fa-solid fa-truck-medical me-2"></i>Fornecedores</a></li>
+                <li><a href="../fornecedores/fornecedores.php" class="nav-link text-dark"><i class="fa-solid fa-truck-medical me-2"></i>Fornecedores</a></li>
             </ul>
         </div>
     </nav>
@@ -87,12 +105,19 @@ redirect_if_not_logged();
                 </p>
             </div>
 
-            <a href="fornecedores.html" class="btn btn-outline-secondary">
+            <a href="fornecedores.php" class="btn btn-outline-secondary">
                 <i class="fa-solid fa-arrow-left me-2"></i>Voltar
             </a>
         </div>
 
-        <form id="formNovoFornecedor" action="fornecedores.html" method="post">
+<form id="formNovoFornecedor" action="novo.php" method="post" novalidate>
+
+    <?php if (!empty($erro)): ?>
+        <div class="alert alert-danger">
+            <i class="fa-solid fa-circle-exclamation me-2"></i>
+            <?= htmlspecialchars($erro) ?>
+        </div>
+    <?php endif; ?>
 
             <!-- Indicador dos passos -->
             <ul class="nav nav-pills nav-fill mb-4">
@@ -160,14 +185,18 @@ redirect_if_not_logged();
                                 <div class="form-text">Exatamente 9 números.</div>
                             </div>
 
+                            
                             <div class="col-md-3">
-                                <label class="form-label fw-bold">Estado *</label>
-                                <select class="form-select" name="estado" required>
-                                    <option value="">Selecione...</option>
-                                    <option selected>Ativo</option>
-                                    <option>Inativo</option>
-                                </select>
-                            </div>
+                                    <label class="form-label fw-bold">Estado</label>
+
+                                    <input type="hidden" name="estado" value="Ativo">
+
+                                      <div class="form-control bg-light">
+                                            <span class="badge bg-success">Ativo</span>
+                                      </div>
+                             </div>
+
+
 
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Tipo de Fornecedor *</label>
@@ -182,16 +211,17 @@ redirect_if_not_logged();
 
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Área de Atuação</label>
-                                <select class="form-select" name="area_atuacao">
-                                    <option value="">Selecione...</option>
-                                    <option>Diagnóstico e Imagiologia</option>
-                                    <option>Monitorização</option>
-                                    <option>Suporte de Vida</option>
-                                    <option>Laboratório</option>
-                                    <option>Consumíveis Hospitalares</option>
-                                    <option>Assistência Técnica</option>
-                                    <option>Outro</option>
-                                </select>
+                                
+                                 <select class="form-select" name="area_atuacao" required>
+                                  <option>Diagnóstico e Imagiologia</option>
+                                  <option>Monitorização</option>
+                                  <option>Suporte de Vida</option>
+                                  <option>Laboratório</option>
+                                  <option>Consumíveis Hospitalares</option>
+                                  <option>Assistência Técnica</option>
+                                  <option selected>Outro</option>
+                                 </select>
+
                             </div>
 
                         </div>
@@ -299,11 +329,13 @@ redirect_if_not_logged();
 
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">Contrato Ativo</label>
-                                <select class="form-select" name="contrato_ativo">
-                                    <option value="">Selecione...</option>
-                                    <option>Sim</option>
-                                    <option>Não</option>
-                                </select>
+                            
+                                   <select class="form-select" name="contrato_ativo">
+                                 <option>Sim</option>
+                                 <option selected>Não</option>
+                                  </select>
+
+
                             </div>
 
                             <div class="col-md-6">
@@ -321,11 +353,11 @@ redirect_if_not_logged();
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Prioridade de Contacto</label>
                                 <select class="form-select" name="prioridade_contacto">
-                                    <option value="">Selecione...</option>
-                                    <option>Normal</option>
-                                    <option>Alta</option>
-                                    <option>Urgente</option>
+                                 <option selected>Normal</option>
+                                 <option>Alta</option>
+                                  <option>Urgente</option>
                                 </select>
+
                             </div>
 
                         </div>
@@ -368,7 +400,7 @@ redirect_if_not_logged();
                 </button>
 
                 <div>
-                    <a href="fornecedores.html" class="btn btn-secondary me-2">
+                    <a href="fornecedores.php" class="btn btn-secondary me-2">
                         Cancelar
                     </a>
 
