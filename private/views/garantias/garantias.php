@@ -1,8 +1,17 @@
 <?php
 
 require_once __DIR__ . '/../../includes/funcoes.php';
+require_once __DIR__ . '/../../includes/database.php';
 
 redirect_if_not_logged();
+
+$garantias = listar_garantias($pdo);
+$estatisticas = calcular_estatisticas_garantias($garantias);
+
+$totalGarantias = $estatisticas['total'];
+$totalAtivas = $estatisticas['ativas'];
+$totalATerminar = $estatisticas['a_terminar'];
+$totalExpiradas = $estatisticas['expiradas'];
 
 ?>
 <!DOCTYPE html>
@@ -11,16 +20,16 @@ redirect_if_not_logged();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SanoGest | Garantias e Contratos</title>
+
     <link rel="stylesheet" href="../../../assets/css/bootstrap.min.css">
     <link rel="stylesheet" href="../../../assets/css/1240881.css">
     <link rel="stylesheet" href="../../../assets/fontawesome/all.min.css">
     <link rel="shortcut icon" href="../../../assets/img/logo 125.png" type="image/png">
-
-
 </head>
+
 <body class="bg-light">
 
-   <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top" style="z-index: 1030 !important; padding-left: 0px !important; padding-right: 0px !important;">
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top" style="z-index: 1030 !important; padding-left: 0px !important; padding-right: 0px !important;">
     <div style="width: 100% !important; display: flex !important; align-items: center !important; justify-content: space-between !important; padding-left: 5px !important; padding-right: 20px !important;">
         
         <a class="navbar-brand fw-bold" href="../../../private/index.php" style="margin-left: 10px !important; display: flex !important; align-items: center !important;">
@@ -44,15 +53,18 @@ redirect_if_not_logged();
                        aria-expanded="false">
                         <i class="fa-solid fa-user me-2"></i>Utilizador
                     </a>
+
                     <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2" aria-labelledby="menuUtilizador">
                         <li>
-                            <a class="dropdown-item py-2" href="../../../private/views/perfil/alterar-senha.html">
+                            <a class="dropdown-item py-2" href="../../../private/views/perfil/alterar-senha.php">
                                 <i class="fa-solid fa-key me-2 text-muted"></i>Trocar palavra-passe
                             </a>
                         </li>
+
                         <li><hr class="dropdown-divider"></li>
+
                         <li>
-                            <a class="dropdown-item py-2 text-danger" href="../../..private/logout.php">
+                            <a class="dropdown-item py-2 text-danger" href="../../../private/logout.php">
                                 <i class="fa-solid fa-right-from-bracket me-2"></i>Sair
                             </a>
                         </li>
@@ -64,281 +76,315 @@ redirect_if_not_logged();
         
     </div>
 </nav>
+
 <div>
     <nav class="bg-white border-end shadow-sm sidebar-fixa">
         <div class="p-3">
             <ul class="nav nav-pills flex-column mb-auto">
-                <li><a href="../dashboard/dashboard.html" class="nav-link text-dark"><i class="fa-solid fa-gauge me-2"></i>Dashboard</a></li>
-                <li><a href="../equipamentos/equipamentos.html" class="nav-link text-dark"><i class="fa-solid fa-microchip me-2"></i>Equipamentos</a></li>
-                <li><a href="../fornecedores/fornecedores.html" class="nav-link text-dark"><i class="fa-solid fa-truck-medical me-2"></i>Fornecedores</a></li>
-                <li><a href="../localizacoes/localizacoes.html" class="nav-link text-dark"><i class="fa-solid fa-map-location-dot me-2"></i>Localizações</a></li>
-                <li><a href="../garantias/garantias.html" class="nav-link text-dark"><i class="fa-solid fa-shield-halved me-2"></i>Garantias</a></li>
-                <li><a href="../documentacao/documentacao.html" class="nav-link text-dark"><i class="fa-solid fa-file-contract me-2"></i>Documentação</a></li>
                 <li>
-                    <a href="../editar/editar-index.html" class="nav-link active">
+                    <a href="../dashboard/dashboard.php" class="nav-link text-dark">
+                        <i class="fa-solid fa-gauge me-2"></i>Dashboard
+                    </a>
+                </li>
+
+                <li>
+                    <a href="../equipamentos/equipamentos.php" class="nav-link text-dark">
+                        <i class="fa-solid fa-microchip me-2"></i>Equipamentos
+                    </a>
+                </li>
+
+                <li>
+                    <a href="../fornecedores/fornecedores.php" class="nav-link text-dark">
+                        <i class="fa-solid fa-truck-medical me-2"></i>Fornecedores
+                    </a>
+                </li>
+
+                <li>
+                    <a href="../localizacoes/localizacoes.php" class="nav-link text-dark">
+                        <i class="fa-solid fa-map-location-dot me-2"></i>Localizações
+                    </a>
+                </li>
+
+                <li>
+                    <a href="../garantias/garantias.php" class="nav-link text-dark">
+                        <i class="fa-solid fa-shield-halved me-2"></i>Garantias
+                    </a>
+                </li>
+
+                <li>
+                    <a href="../documentacao/documentacao.php" class="nav-link text-dark">
+                        <i class="fa-solid fa-file-contract me-2"></i>Documentação
+                    </a>
+                </li>
+
+                <li>
+                    <a href="../editar/editar-index.php" class="nav-link active">
                         <i class="fa-solid fa-pen-to-square me-2"></i>Editar Página Pública
                     </a>
                 </li>
             </ul>
         </div>
     </nav>
+
     <main class="p-5 fundo-dashboard conteudo-principal">
         <div class="bg-white bg-opacity-75 p-5 rounded shadow-sm">
 
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h2 class="text-primary fw-bold mb-1">
-                    <i class="fa-solid fa-shield-halved me-2"></i>Garantias e Contratos
-                </h2>
-                <p class="text-muted mb-0">
-                    Controlo de garantias, contratos de manutenção e datas de validade dos equipamentos médicos.
-                </p>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="text-primary fw-bold mb-1">
+                        <i class="fa-solid fa-shield-halved me-2"></i>Garantias e Contratos
+                    </h2>
+
+                    <p class="text-muted mb-0">
+                        Controlo de garantias, contratos de manutenção e datas de validade dos equipamentos médicos.
+                    </p>
+                </div>
+
+                <a href="novo.php" class="btn btn-primary">
+                    <i class="fa-solid fa-plus me-2"></i>Registar Garantia/Contrato
+                </a>
             </div>
 
-            <a href="nova_garantia.html" class="btn btn-primary">
-                <i class="fa-solid fa-plus me-2"></i>Registar Garantia/Contrato
-            </a>
-        </div>
-
-        <!-- Cartões de resumo -->
-        <div class="row g-3 mb-4">
-            <div class="col-md-3">
-                <div class="card p-3 shadow-sm border-0 border-start border-primary border-5 h-100">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted">Total</h6>
-                            <h3 class="fw-bold mb-0">8</h3>
+            <!-- Cartões de resumo -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <div class="card p-3 shadow-sm border-0 border-start border-primary border-5 h-100">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted">Total</h6>
+                                <h3 class="fw-bold mb-0"><?= htmlspecialchars($totalGarantias) ?></h3>
+                            </div>
+                            <i class="fa-solid fa-file-contract text-primary fs-2"></i>
                         </div>
-                        <i class="fa-solid fa-file-contract text-primary fs-2"></i>
+                        <small class="text-muted mt-2">Garantias e contratos registados</small>
                     </div>
-                    <small class="text-muted mt-2">Garantias e contratos registados</small>
                 </div>
-            </div>
 
-            <div class="col-md-3">
-                <div class="card p-3 shadow-sm border-0 border-start border-success border-5 h-100">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted">Ativos</h6>
-                            <h3 class="fw-bold mb-0">5</h3>
+                <div class="col-md-3">
+                    <div class="card p-3 shadow-sm border-0 border-start border-success border-5 h-100">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted">Ativas</h6>
+                                <h3 class="fw-bold mb-0"><?= htmlspecialchars($totalAtivas) ?></h3>
+                            </div>
+                            <i class="fa-solid fa-circle-check text-success fs-2"></i>
                         </div>
-                        <i class="fa-solid fa-circle-check text-success fs-2"></i>
+                        <small class="text-muted mt-2">Dentro da validade</small>
                     </div>
-                    <small class="text-muted mt-2">Dentro da validade</small>
                 </div>
-            </div>
 
-            <div class="col-md-3">
-                <div class="card p-3 shadow-sm border-0 border-start border-warning border-5 h-100">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted">A terminar</h6>
-                            <h3 class="fw-bold mb-0">2</h3>
+                <div class="col-md-3">
+                    <div class="card p-3 shadow-sm border-0 border-start border-warning border-5 h-100">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted">A terminar</h6>
+                                <h3 class="fw-bold mb-0"><?= htmlspecialchars($totalATerminar) ?></h3>
+                            </div>
+                            <i class="fa-solid fa-clock text-warning fs-2"></i>
                         </div>
-                        <i class="fa-solid fa-clock text-warning fs-2"></i>
+                        <small class="text-muted mt-2">Necessitam acompanhamento</small>
                     </div>
-                    <small class="text-muted mt-2">Terminam em menos de 30 dias</small>
                 </div>
-            </div>
 
-            <div class="col-md-3">
-                <div class="card p-3 shadow-sm border-0 border-start border-danger border-5 h-100">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted">Expirados</h6>
-                            <h3 class="fw-bold mb-0">1</h3>
+                <div class="col-md-3">
+                    <div class="card p-3 shadow-sm border-0 border-start border-danger border-5 h-100">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted">Expiradas</h6>
+                                <h3 class="fw-bold mb-0"><?= htmlspecialchars($totalExpiradas) ?></h3>
+                            </div>
+                            <i class="fa-solid fa-calendar-xmark text-danger fs-2"></i>
                         </div>
-                        <i class="fa-solid fa-calendar-xmark text-danger fs-2"></i>
+                        <small class="text-muted mt-2">Requerem revisão</small>
                     </div>
-                    <small class="text-muted mt-2">Requerem revisão</small>
                 </div>
             </div>
-        </div>
 
-        <!-- Pesquisa e filtros -->
-        <div class="card shadow-sm border-0 mb-4">
-            <div class="card-header bg-white fw-bold">
-                <i class="fa-solid fa-filter me-2 text-primary"></i>Pesquisa e Filtros
-            </div>
+            <!-- Pesquisa e filtros -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white fw-bold">
+                    <i class="fa-solid fa-filter me-2 text-primary"></i>Pesquisa e Filtros
+                </div>
 
-            <div class="card-body">
-                <div class="row g-3">
+                <div class="card-body">
+                    <div class="row g-3">
 
-                    <div class="col-md-5">
-                        <label for="pesquisaGarantia" class="form-label fw-bold">Pesquisar</label>
-                        <input 
-                            type="text" 
-                            id="pesquisaGarantia" 
-                            class="form-control" 
-                            placeholder="Pesquisar por equipamento, fornecedor, contrato ou responsável..."
-                        >
+                        <div class="col-md-5">
+                            <label for="pesquisaGarantia" class="form-label fw-bold">Pesquisar</label>
+                            <input 
+                                type="text" 
+                                id="pesquisaGarantia" 
+                                class="form-control" 
+                                placeholder="Pesquisar por equipamento, fornecedor, contrato ou responsável..."
+                            >
+                        </div>
+
+                        <div class="col-md-3">
+                            <label for="filtroEstadoGarantia" class="form-label fw-bold">Estado</label>
+                            <select id="filtroEstadoGarantia" class="form-select">
+                                <option value="">Todos</option>
+                                <option value="Ativa">Ativa</option>
+                                <option value="A Terminar">A terminar</option>
+                                <option value="Expirada">Expirada</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label for="filtroTipoContrato" class="form-label fw-bold">Tipo</label>
+                            <select id="filtroTipoContrato" class="form-select">
+                                <option value="">Todos</option>
+                                <option value="Garantia">Garantia</option>
+                                <option value="Preventiva">Preventiva</option>
+                                <option value="Corretiva">Corretiva</option>
+                                <option value="Full Service">Full Service</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label for="filtroCriticidadeGarantia" class="form-label fw-bold">Criticidade</label>
+                            <select id="filtroCriticidadeGarantia" class="form-select">
+                                <option value="">Todas</option>
+                                <option value="Baixa">Baixa</option>
+                                <option value="Média">Média</option>
+                                <option value="Alta">Alta</option>
+                                <option value="Suporte de Vida">Suporte de Vida</option>
+                            </select>
+                        </div>
+
                     </div>
-
-                    <div class="col-md-3">
-                        <label for="filtroEstadoGarantia" class="form-label fw-bold">Estado</label>
-                        <select id="filtroEstadoGarantia" class="form-select">
-                            <option value="">Todos</option>
-                            <option value="Ativa">Ativa</option>
-                            <option value="A Terminar">A terminar</option>
-                            <option value="Expirada">Expirada</option>
-                        </select>
-                    </div>
-
-                    <div class="col-md-2">
-                        <label for="filtroTipoContrato" class="form-label fw-bold">Tipo</label>
-                        <select id="filtroTipoContrato" class="form-select">
-                            <option value="">Todos</option>
-                            <option value="Garantia">Garantia</option>
-                            <option value="Preventiva">Preventiva</option>
-                            <option value="Corretiva">Corretiva</option>
-                            <option value="Full Service">Full Service</option>
-                        </select>
-                    </div>
-
-                    <div class="col-md-2">
-                        <label for="filtroCriticidadeGarantia" class="form-label fw-bold">Criticidade</label>
-                        <select id="filtroCriticidadeGarantia" class="form-select">
-                            <option value="">Todas</option>
-                            <option value="Baixa">Baixa</option>
-                            <option value="Média">Média</option>
-                            <option value="Alta">Alta</option>
-                            <option value="Suporte de Vida">Suporte de Vida</option>
-                        </select>
-                    </div>
-
                 </div>
             </div>
+
+            <!-- Tabela -->
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <span class="fw-bold">
+                        <i class="fa-solid fa-list me-2 text-primary"></i>Lista de Garantias e Contratos
+                    </span>
+
+                    <small class="text-muted">
+                        Controlo documental e contratual dos equipamentos
+                    </small>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0" id="tabelaGarantias">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Equipamento</th>
+                                <th>Fornecedor/Responsável</th>
+                                <th>Tipo</th>
+                                <th>Início</th>
+                                <th>Fim</th>
+                                <th>Estado</th>
+                                <th>Criticidade</th>
+                                <th>Documento</th>
+                                <th class="text-end">Ações</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <?php if (empty($garantias)): ?>
+                                <tr>
+                                    <td colspan="9" class="text-center text-muted py-4">
+                                        <i class="fa-solid fa-circle-info me-2"></i>
+                                        Não existem garantias ou contratos registados.
+                                    </td>
+                                </tr>
+                            <?php else: ?>
+                                <?php foreach ($garantias as $garantia): ?>
+                                    <tr 
+                                        data-estado="<?= htmlspecialchars($garantia->estado ?? '') ?>" 
+                                        data-tipo="<?= htmlspecialchars($garantia->tipo_contrato ?? '') ?>" 
+                                        data-criticidade="<?= htmlspecialchars($garantia->criticidade ?? '') ?>"
+                                    >
+                                        <td class="fw-bold">
+                                            <?= htmlspecialchars(($garantia->codigo_inventario ?? '') . ' | ' . ($garantia->equipamento_designacao ?? '')) ?>
+                                        </td>
+
+                                        <td>
+                                            <?= !empty($garantia->fornecedor_nome) ? htmlspecialchars($garantia->fornecedor_nome) : 'Sem fornecedor associado' ?>
+                                        </td>
+
+                                        <td>
+                                            <span class="badge bg-<?= badge_tipo_contrato($garantia->tipo_contrato ?? '') ?>">
+                                                <?= htmlspecialchars($garantia->tipo_contrato ?? '') ?>
+                                            </span>
+                                        </td>
+
+                                        <td>
+                                            <?= !empty($garantia->data_inicio) ? htmlspecialchars(date('d/m/Y', strtotime($garantia->data_inicio))) : '—' ?>
+                                        </td>
+
+                                        <td>
+                                            <?= !empty($garantia->data_fim) ? htmlspecialchars(date('d/m/Y', strtotime($garantia->data_fim))) : '—' ?>
+                                        </td>
+
+                                        <td>
+                                            <span class="badge bg-<?= badge_estado_garantia($garantia->estado ?? '') ?>">
+                                                <?= htmlspecialchars($garantia->estado ?? '') ?>
+                                            </span>
+                                        </td>
+
+                                        <td>
+                                            <span class="badge bg-<?= badge_criticidade_garantia($garantia->criticidade ?? '') ?>">
+                                                <?= htmlspecialchars($garantia->criticidade ?? '') ?>
+                                            </span>
+                                        </td>
+
+                                        <td>
+                                            <?= !empty($garantia->documento_associado) ? htmlspecialchars($garantia->documento_associado) : '—' ?>
+                                        </td>
+
+                                        <td class="text-end">
+
+                                            <a href="consultar.php?id_garantia=<?= htmlspecialchars($garantia->id_garantia) ?>" 
+                                               class="btn btn-sm btn-outline-info" 
+                                               title="Consultar">
+                                                <i class="fa-solid fa-file-lines"></i>
+                                            </a>
+
+                                            <?php if (!garantia_expirada($garantia)): ?>
+                                                <a href="editar.php?id_garantia=<?= htmlspecialchars($garantia->id_garantia) ?>" 
+                                                   class="btn btn-sm btn-outline-warning" 
+                                                   title="Editar">
+                                                    <i class="fa-solid fa-pen"></i>
+                                                </a>
+
+                                                <a href="apagar.php?id_garantia=<?= htmlspecialchars($garantia->id_garantia) ?>" 
+                                                   class="btn btn-sm btn-outline-danger" 
+                                                   title="Terminar/Expirar">
+                                                    <i class="fa-solid fa-ban"></i>
+                                                </a>
+                                            <?php else: ?>
+                                                <button class="btn btn-sm btn-outline-secondary" disabled title="Garantia expirada">
+                                                    <i class="fa-solid fa-pen-slash"></i>
+                                                </button>
+
+                                                <button class="btn btn-sm btn-outline-secondary" disabled title="Já se encontra expirada">
+                                                    <i class="fa-solid fa-ban"></i>
+                                                </button>
+                                            <?php endif; ?>
+
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card-footer bg-white text-muted small">
+                    Use a pesquisa ou os filtros para localizar rapidamente garantias por equipamento, fornecedor, estado, tipo ou criticidade.
+                </div>
+            </div>
+
         </div>
-
-        <!-- Tabela -->
-        <div class="card shadow-sm border-0">
-            <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                <span class="fw-bold">
-                    <i class="fa-solid fa-list me-2 text-primary"></i>Lista de Garantias e Contratos
-                </span>
-                <small class="text-muted">Controlo documental e contratual dos equipamentos</small>
-            </div>
-
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0" id="tabelaGarantias">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Equipamento</th>
-                            <th>Fornecedor/Responsável</th>
-                            <th>Tipo</th>
-                            <th>Início</th>
-                            <th>Fim</th>
-                            <th>Estado</th>
-                            <th>Criticidade</th>
-                            <th>Documento</th>
-                            <th class="text-end">Ações</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        <tr data-estado="Ativa" data-tipo="Preventiva" data-criticidade="Suporte de Vida">
-                            <td class="fw-bold">Ventilador EQP-001</td>
-                            <td>Siemens Healthineers</td>
-                            <td><span class="badge bg-info text-dark">Preventiva</span></td>
-                            <td>01/01/2026</td>
-                            <td>01/01/2028</td>
-                            <td><span class="badge bg-success">Ativa</span></td>
-                            <td><span class="badge bg-danger">Suporte de Vida</span></td>
-                            <td>contrato_eqp001.pdf</td>
-                            <td class="text-end">
-                                <a href="detalhes_garantia.html" class="btn btn-sm btn-outline-info" title="Consultar">
-                                    <i class="fa-solid fa-file-lines"></i>
-                                </a>
-                                <a href="editar_garantia.html" class="btn btn-sm btn-outline-warning" title="Editar">
-                                    <i class="fa-solid fa-pen"></i>
-                                </a>
-                                <a href="apagar_garantia.html" class="btn btn-sm btn-outline-danger" title="Remover">
-                                    <i class="fa-solid fa-trash"></i>
-                                </a>
-                            </td>
-                        </tr>
-
-                        <tr data-estado="A Terminar" data-tipo="Garantia" data-criticidade="Alta">
-                            <td class="fw-bold">Monitor Philips EQP-002</td>
-                            <td>Philips Healthcare Portugal</td>
-                            <td><span class="badge bg-primary">Garantia</span></td>
-                            <td>15/07/2024</td>
-                            <td>15/07/2026</td>
-                            <td><span class="badge bg-warning text-dark">A terminar</span></td>
-                            <td><span class="badge bg-warning text-dark">Alta</span></td>
-                            <td>garantia_eqp002.pdf</td>
-                            <td class="text-end">
-                                <a href="detalhes_garantia.html" class="btn btn-sm btn-outline-info" title="Consultar">
-                                    <i class="fa-solid fa-file-lines"></i>
-                                </a>
-                                <a href="editar_garantia.html" class="btn btn-sm btn-outline-warning" title="Editar">
-                                    <i class="fa-solid fa-pen"></i>
-                                </a>
-                                <a href="apagar_garantia.html" class="btn btn-sm btn-outline-danger" title="Remover">
-                                    <i class="fa-solid fa-trash"></i>
-                                </a>
-                            </td>
-                        </tr>
-
-                        <tr data-estado="Ativa" data-tipo="Full Service" data-criticidade="Alta">
-                            <td class="fw-bold">Desfibrilhador EQP-004</td>
-                            <td>Dräger Portugal</td>
-                            <td><span class="badge bg-dark">Full Service</span></td>
-                            <td>10/03/2025</td>
-                            <td>10/03/2029</td>
-                            <td><span class="badge bg-success">Ativa</span></td>
-                            <td><span class="badge bg-warning text-dark">Alta</span></td>
-                            <td>fullservice_eqp004.pdf</td>
-                            <td class="text-end">
-                                <a href="detalhes_garantia.html" class="btn btn-sm btn-outline-info" title="Consultar">
-                                    <i class="fa-solid fa-file-lines"></i>
-                                </a>
-                                <a href="editar_garantia.html" class="btn btn-sm btn-outline-warning" title="Editar">
-                                    <i class="fa-solid fa-pen"></i>
-                                </a>
-                                <a href="apagar_garantia.html" class="btn btn-sm btn-outline-danger" title="Remover">
-                                    <i class="fa-solid fa-trash"></i>
-                                </a>
-                            </td>
-                        </tr>
-
-                        <tr data-estado="Expirada" data-tipo="Corretiva" data-criticidade="Média">
-                            <td class="fw-bold">Bomba Infusão EQP-003</td>
-                            <td>B. Braun</td>
-                            <td><span class="badge bg-secondary">Corretiva</span></td>
-                            <td>01/01/2023</td>
-                            <td>01/01/2025</td>
-                            <td><span class="badge bg-danger">Expirada</span></td>
-                            <td><span class="badge bg-info text-dark">Média</span></td>
-                            <td>contrato_eqp003.pdf</td>
-                            <td class="text-end">
-                                <a href="detalhes_garantia.html" class="btn btn-sm btn-outline-info" title="Consultar">
-                                    <i class="fa-solid fa-file-lines"></i>
-                                </a>
-                                <a href="editar_garantia.html" class="btn btn-sm btn-outline-warning" title="Editar">
-                                    <i class="fa-solid fa-pen"></i>
-                                </a>
-                                <a href="apagar_garantia.html" class="btn btn-sm btn-outline-danger" title="Remover">
-                                    <i class="fa-solid fa-trash"></i>
-                                </a>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="card-footer bg-white text-muted small">
-                Use a pesquisa e os filtros para localizar rapidamente garantias por equipamento, fornecedor, tipo ou criticidade.
-            </div>
-        </div>
-
-    </div>
-        
-        </main>
+    </main>
 </div>
-    
-    <script src="../../../assets/js/bootstrap.bundle.min.js"></script>
-    <script src="../../../assets/js/1240881.js"></script>
-    
+
+<script src="../../../assets/js/bootstrap.bundle.min.js"></script>
+<script src="../../../assets/js/1240881.js"></script>
+
 </body>
 </html>
