@@ -1269,3 +1269,423 @@ function validar_dados_localizacao($dados)
 
     return true;
 }
+
+// =====================================================
+// GARANTIAS E CONTRATOS — BADGES / ESTADOS VISUAIS
+// =====================================================
+
+function badge_estado_garantia($estado)
+{
+    return match ($estado) {
+        'Ativa' => 'success',
+        'A Terminar' => 'warning text-dark',
+        'Expirada' => 'danger',
+        default => 'secondary'
+    };
+}
+
+function badge_tipo_contrato($tipo_contrato)
+{
+    return match ($tipo_contrato) {
+        'Garantia' => 'primary',
+        'Preventiva' => 'info text-dark',
+        'Corretiva' => 'secondary',
+        'Full Service' => 'dark',
+        default => 'secondary'
+    };
+}
+
+function badge_criticidade_garantia($criticidade)
+{
+    return match ($criticidade) {
+        'Baixa' => 'secondary',
+        'Média' => 'info text-dark',
+        'Alta' => 'warning text-dark',
+        'Suporte de Vida' => 'danger',
+        default => 'secondary'
+    };
+}
+
+function garantia_expirada($garantia)
+{
+    return ($garantia->estado ?? '') === 'Expirada';
+}
+
+
+// =====================================================
+// GARANTIAS E CONTRATOS — LISTAGEM E CONSULTA
+// =====================================================
+
+function listar_garantias($pdo)
+{
+    $sql = "SELECT 
+                g.*,
+
+                e.codigo_inventario,
+                e.designacao AS equipamento_designacao,
+                e.marca AS equipamento_marca,
+                e.modelo AS equipamento_modelo,
+
+                f.nome_empresa AS fornecedor_nome,
+                f.nif AS fornecedor_nif,
+                f.email AS fornecedor_email,
+                f.telefone AS fornecedor_telefone,
+                f.pessoa_contacto AS fornecedor_pessoa_contacto,
+                f.prioridade_contacto AS fornecedor_prioridade
+
+            FROM garantias_contratos g
+            INNER JOIN equipamentos e ON g.id_equipamento = e.id_equipamento
+            LEFT JOIN fornecedores f ON g.id_fornecedor = f.id_fornecedor
+            ORDER BY g.data_fim ASC, g.id_garantia DESC";
+
+    $stmt = $pdo->query($sql);
+
+    return $stmt->fetchAll();
+}
+
+function buscar_garantia_por_id($pdo, $id_garantia)
+{
+    if (!validar_id($id_garantia)) {
+        return false;
+    }
+
+    $sql = "SELECT 
+                g.*,
+
+                e.codigo_inventario,
+                e.designacao AS equipamento_designacao,
+                e.marca AS equipamento_marca,
+                e.modelo AS equipamento_modelo,
+                e.num_serie AS equipamento_num_serie,
+                e.estado AS equipamento_estado,
+
+                f.nome_empresa AS fornecedor_nome,
+                f.nif AS fornecedor_nif,
+                f.email AS fornecedor_email,
+                f.telefone AS fornecedor_telefone,
+                f.pessoa_contacto AS fornecedor_pessoa_contacto,
+                f.prioridade_contacto AS fornecedor_prioridade
+
+            FROM garantias_contratos g
+            INNER JOIN equipamentos e ON g.id_equipamento = e.id_equipamento
+            LEFT JOIN fornecedores f ON g.id_fornecedor = f.id_fornecedor
+            WHERE g.id_garantia = :id_garantia
+            LIMIT 1";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindValue(':id_garantia', $id_garantia, PDO::PARAM_INT);
+    $stmt->execute();
+
+    return $stmt->fetch();
+}
+
+function calcular_estatisticas_garantias($garantias)
+{
+    $estatisticas = [
+        'total' => count($garantias),
+        'ativas' => 0,
+        'a_terminar' => 0,
+        'expiradas' => 0
+    ];
+
+    foreach ($garantias as $garantia) {
+        $estado = $garantia->estado ?? '';
+
+        if ($estado === 'Ativa') {
+            $estatisticas['ativas']++;
+        }
+
+        if ($estado === 'A Terminar') {
+            $estatisticas['a_terminar']++;
+        }
+
+        if ($estado === 'Expirada') {
+            $estatisticas['expiradas']++;
+        }
+    }
+
+    return $estatisticas;
+}
+
+
+// =====================================================
+// GARANTIAS E CONTRATOS — DADOS PARA SELECTS
+// =====================================================
+
+function listar_equipamentos_para_garantia($pdo)
+{
+    $sql = "SELECT 
+                id_equipamento,
+                codigo_inventario,
+                designacao,
+                marca,
+                modelo,
+                estado
+            FROM equipamentos
+            WHERE estado <> 'Abatido'
+            ORDER BY codigo_inventario ASC";
+
+    $stmt = $pdo->query($sql);
+
+    return $stmt->fetchAll();
+}
+
+function listar_fornecedores_para_garantia($pdo)
+{
+    $sql = "SELECT 
+                id_fornecedor,
+                nome_empresa,
+                tipo_fornecedor,
+                estado
+            FROM fornecedores
+            WHERE estado = 'Ativo'
+            ORDER BY nome_empresa ASC";
+
+    $stmt = $pdo->query($sql);
+
+    return $stmt->fetchAll();
+}
+
+
+// =====================================================
+// GARANTIAS E CONTRATOS — CRIAÇÃO
+// =====================================================
+
+function criar_garantia($pdo, $dados)
+{
+    $sql = "INSERT INTO garantias_contratos
+            (
+                id_equipamento,
+                id_fornecedor,
+                tipo_contrato,
+                estado,
+                criticidade,
+                numero_contrato,
+                data_inicio,
+                data_fim,
+                custo_anual,
+                pessoa_contacto,
+                telefone_contacto,
+                documento_associado,
+                caminho_documento,
+                observacoes
+            )
+            VALUES
+            (
+                :id_equipamento,
+                :id_fornecedor,
+                :tipo_contrato,
+                :estado,
+                :criticidade,
+                :numero_contrato,
+                :data_inicio,
+                :data_fim,
+                :custo_anual,
+                :pessoa_contacto,
+                :telefone_contacto,
+                :documento_associado,
+                :caminho_documento,
+                :observacoes
+            )";
+
+    $stmt = $pdo->prepare($sql);
+
+    $stmt->bindValue(':id_equipamento', $dados['id_equipamento'], PDO::PARAM_INT);
+    bind_valor_ou_null($stmt, ':id_fornecedor', $dados['id_fornecedor']);
+
+    $stmt->bindValue(':tipo_contrato', $dados['tipo_contrato']);
+    $stmt->bindValue(':estado', $dados['estado']);
+    $stmt->bindValue(':criticidade', $dados['criticidade']);
+
+    bind_valor_ou_null($stmt, ':numero_contrato', $dados['numero_contrato']);
+    $stmt->bindValue(':data_inicio', $dados['data_inicio']);
+    $stmt->bindValue(':data_fim', $dados['data_fim']);
+    $stmt->bindValue(':custo_anual', $dados['custo_anual']);
+
+    bind_valor_ou_null($stmt, ':pessoa_contacto', $dados['pessoa_contacto']);
+    bind_valor_ou_null($stmt, ':telefone_contacto', $dados['telefone_contacto']);
+    bind_valor_ou_null($stmt, ':documento_associado', $dados['documento_associado']);
+    bind_valor_ou_null($stmt, ':caminho_documento', $dados['caminho_documento']);
+    bind_valor_ou_null($stmt, ':observacoes', $dados['observacoes']);
+
+    $stmt->execute();
+
+    return $pdo->lastInsertId();
+}
+
+
+// =====================================================
+// GARANTIAS E CONTRATOS — ATUALIZAÇÃO
+// =====================================================
+
+function atualizar_garantia($pdo, $id_garantia, $dados)
+{
+    if (!validar_id($id_garantia)) {
+        return false;
+    }
+
+    $sql = "UPDATE garantias_contratos
+            SET id_equipamento = :id_equipamento,
+                id_fornecedor = :id_fornecedor,
+                tipo_contrato = :tipo_contrato,
+                estado = :estado,
+                criticidade = :criticidade,
+                numero_contrato = :numero_contrato,
+                data_inicio = :data_inicio,
+                data_fim = :data_fim,
+                custo_anual = :custo_anual,
+                pessoa_contacto = :pessoa_contacto,
+                telefone_contacto = :telefone_contacto,
+                documento_associado = :documento_associado,
+                caminho_documento = :caminho_documento,
+                observacoes = :observacoes
+            WHERE id_garantia = :id_garantia";
+
+    $stmt = $pdo->prepare($sql);
+
+    $stmt->bindValue(':id_equipamento', $dados['id_equipamento'], PDO::PARAM_INT);
+    bind_valor_ou_null($stmt, ':id_fornecedor', $dados['id_fornecedor']);
+
+    $stmt->bindValue(':tipo_contrato', $dados['tipo_contrato']);
+    $stmt->bindValue(':estado', $dados['estado']);
+    $stmt->bindValue(':criticidade', $dados['criticidade']);
+
+    bind_valor_ou_null($stmt, ':numero_contrato', $dados['numero_contrato']);
+    $stmt->bindValue(':data_inicio', $dados['data_inicio']);
+    $stmt->bindValue(':data_fim', $dados['data_fim']);
+    $stmt->bindValue(':custo_anual', $dados['custo_anual']);
+
+    bind_valor_ou_null($stmt, ':pessoa_contacto', $dados['pessoa_contacto']);
+    bind_valor_ou_null($stmt, ':telefone_contacto', $dados['telefone_contacto']);
+    bind_valor_ou_null($stmt, ':documento_associado', $dados['documento_associado']);
+    bind_valor_ou_null($stmt, ':caminho_documento', $dados['caminho_documento']);
+    bind_valor_ou_null($stmt, ':observacoes', $dados['observacoes']);
+
+    $stmt->bindValue(':id_garantia', $id_garantia, PDO::PARAM_INT);
+
+    return $stmt->execute();
+}
+
+
+// =====================================================
+// GARANTIAS E CONTRATOS — TERMINAR / SOFT DELETE
+// =====================================================
+
+function terminar_garantia($pdo, $id_garantia)
+{
+    if (!validar_id($id_garantia)) {
+        return false;
+    }
+
+    $sql = "UPDATE garantias_contratos
+            SET estado = 'Expirada'
+            WHERE id_garantia = :id_garantia";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindValue(':id_garantia', $id_garantia, PDO::PARAM_INT);
+
+    return $stmt->execute();
+}
+
+
+// =====================================================
+// GARANTIAS E CONTRATOS — FORMULÁRIOS E VALIDAÇÃO
+// =====================================================
+
+function recolher_dados_garantia_post()
+{
+    $id_fornecedor = $_POST['id_fornecedor'] ?? '';
+    $custo_anual = $_POST['custo_anual'] ?? '';
+
+    return [
+        'id_equipamento' => $_POST['id_equipamento'] ?? '',
+        'id_fornecedor' => $id_fornecedor !== '' ? $id_fornecedor : null,
+
+        'tipo_contrato' => limpar_texto($_POST['tipo_contrato'] ?? ''),
+        'estado' => limpar_texto($_POST['estado'] ?? 'Ativa'),
+        'criticidade' => limpar_texto($_POST['criticidade'] ?? ''),
+
+        'numero_contrato' => valor_ou_null($_POST['numero_contrato'] ?? ''),
+        'data_inicio' => $_POST['data_inicio'] ?? '',
+        'data_fim' => $_POST['data_fim'] ?? '',
+        'custo_anual' => $custo_anual !== '' ? $custo_anual : 0,
+
+        'pessoa_contacto' => valor_ou_null($_POST['pessoa_contacto'] ?? ''),
+        'telefone_contacto' => valor_ou_null($_POST['telefone_contacto'] ?? ''),
+        'documento_associado' => valor_ou_null($_POST['documento_associado'] ?? ''),
+        'caminho_documento' => valor_ou_null($_POST['caminho_documento'] ?? ''),
+        'observacoes' => valor_ou_null($_POST['observacoes'] ?? '')
+    ];
+}
+
+function validar_dados_garantia($dados)
+{
+    $campos_obrigatorios = [
+        'id_equipamento',
+        'tipo_contrato',
+        'estado',
+        'criticidade',
+        'data_inicio',
+        'data_fim'
+    ];
+
+    foreach ($campos_obrigatorios as $campo) {
+        if (!isset($dados[$campo]) || $dados[$campo] === '') {
+            return false;
+        }
+    }
+
+    if (!validar_id($dados['id_equipamento'])) {
+        return false;
+    }
+
+    if (!empty($dados['id_fornecedor']) && !validar_id($dados['id_fornecedor'])) {
+        return false;
+    }
+
+    $tipos_validos = [
+        'Garantia',
+        'Preventiva',
+        'Corretiva',
+        'Full Service'
+    ];
+
+    if (!in_array($dados['tipo_contrato'], $tipos_validos, true)) {
+        return false;
+    }
+
+    $estados_validos = [
+        'Ativa',
+        'A Terminar',
+        'Expirada'
+    ];
+
+    if (!in_array($dados['estado'], $estados_validos, true)) {
+        return false;
+    }
+
+    $criticidades_validas = [
+        'Baixa',
+        'Média',
+        'Alta',
+        'Suporte de Vida'
+    ];
+
+    if (!in_array($dados['criticidade'], $criticidades_validas, true)) {
+        return false;
+    }
+
+    if (strtotime($dados['data_fim']) < strtotime($dados['data_inicio'])) {
+        return false;
+    }
+
+    if (!is_numeric($dados['custo_anual']) || (float) $dados['custo_anual'] < 0) {
+        return false;
+    }
+
+    if (!empty($dados['telefone_contacto']) && !preg_match('/^[0-9]{9}$/', $dados['telefone_contacto'])) {
+        return false;
+    }
+
+    return true;
+}
