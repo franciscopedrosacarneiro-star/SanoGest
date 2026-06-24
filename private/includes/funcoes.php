@@ -1,4 +1,3 @@
-
 <?php
 
 require_once __DIR__ . '/../../config/config.php';
@@ -52,7 +51,6 @@ function logout()
     exit;
 }
 
-
 // =====================================================
 // FUNÇÕES GERAIS AUXILIARES
 // =====================================================
@@ -78,7 +76,6 @@ function bind_valor_ou_null($stmt, $parametro, $valor)
     }
 }
 
-
 function redirecionar($pagina)
 {
     header('Location: ' . $pagina);
@@ -94,7 +91,6 @@ function selecionado($valor_atual, $valor_opcao)
 {
     return $valor_atual === $valor_opcao ? 'selected' : '';
 }
-
 
 // =====================================================
 // BADGES / ESTADOS VISUAIS
@@ -126,7 +122,6 @@ function equipamento_abatido($equipamento)
 {
     return ($equipamento->estado ?? '') === 'Abatido';
 }
-
 
 // =====================================================
 // EQUIPAMENTOS — LISTAGEM E CONSULTA
@@ -226,7 +221,6 @@ function calcular_estatisticas_equipamentos($equipamentos)
     return $estatisticas;
 }
 
-
 // =====================================================
 // EQUIPAMENTOS — ABATER / SOFT DELETE
 // =====================================================
@@ -246,7 +240,6 @@ function abater_equipamento($pdo, $id_equipamento)
 
     return $stmt->execute();
 }
-
 
 // =====================================================
 // EQUIPAMENTOS — CRIAÇÃO
@@ -370,7 +363,6 @@ function criar_equipamento($pdo, $dados)
     }
 }
 
-
 // =====================================================
 // EQUIPAMENTOS — ATUALIZAÇÃO
 // =====================================================
@@ -441,7 +433,6 @@ function atualizar_equipamento($pdo, $id_equipamento, $dados, $id_localizacao = 
     }
 }
 
-
 // =====================================================
 // EQUIPAMENTOS — FORMULÁRIOS E VALIDAÇÃO
 // =====================================================
@@ -506,6 +497,7 @@ function validar_dados_equipamento($dados, $validar_localizacao = true)
 
     return true;
 }
+
 // =====================================================
 // FORNECEDORES — BADGES / ESTADOS VISUAIS
 // =====================================================
@@ -529,6 +521,17 @@ function badge_prioridade_fornecedor($prioridade)
     };
 }
 
+function badge_tipo_fornecedor($tipo)
+{
+    return match ($tipo) {
+        'Fabricante' => 'success',
+        'Distribuidor / Fornecedor Comercial' => 'info text-dark',
+        'Empresa de Assistência Técnica' => 'warning text-dark',
+        'Fornecedor de Consumíveis/Acessórios' => 'secondary',
+        default => 'primary'
+    };
+}
+
 function fornecedor_inativo($fornecedor)
 {
     return ($fornecedor->estado ?? '') === 'Inativo';
@@ -541,15 +544,19 @@ function fornecedor_inativo($fornecedor)
 
 function listar_fornecedores($pdo)
 {
-    try {
-        $sql = "SELECT * FROM vw_fornecedores_completo ORDER BY id_fornecedor DESC";
-        $stmt = $pdo->query($sql);
-        return $stmt->fetchAll();
-    } catch (PDOException $erro) {
-        $sql = "SELECT * FROM fornecedores ORDER BY id_fornecedor DESC";
-        $stmt = $pdo->query($sql);
-        return $stmt->fetchAll();
-    }
+    $sql = "SELECT 
+                f.*,
+                COALESCE((
+                    SELECT COUNT(*)
+                    FROM equipamentos e
+                    WHERE e.id_fornecedor_principal = f.id_fornecedor
+                ), 0) AS total_equipamentos_associados
+            FROM fornecedores f
+            ORDER BY f.id_fornecedor DESC";
+
+    $stmt = $pdo->query($sql);
+
+    return $stmt->fetchAll();
 }
 
 function buscar_fornecedor_por_id($pdo, $id_fornecedor)
@@ -558,26 +565,15 @@ function buscar_fornecedor_por_id($pdo, $id_fornecedor)
         return false;
     }
 
-    try {
-        $sql = "SELECT * FROM vw_fornecedores_completo
-                WHERE id_fornecedor = :id_fornecedor
-                LIMIT 1";
-
-        $stmt = $pdo->prepare($sql);
-        $stmt->bindValue(':id_fornecedor', $id_fornecedor, PDO::PARAM_INT);
-        $stmt->execute();
-
-        $fornecedor = $stmt->fetch();
-
-        if ($fornecedor) {
-            return $fornecedor;
-        }
-    } catch (PDOException $erro) {
-        // Se a view falhar, procura na tabela base.
-    }
-
-    $sql = "SELECT * FROM fornecedores
-            WHERE id_fornecedor = :id_fornecedor
+    $sql = "SELECT 
+                f.*,
+                COALESCE((
+                    SELECT COUNT(*)
+                    FROM equipamentos e
+                    WHERE e.id_fornecedor_principal = f.id_fornecedor
+                ), 0) AS total_equipamentos_associados
+            FROM fornecedores f
+            WHERE f.id_fornecedor = :id_fornecedor
             LIMIT 1";
 
     $stmt = $pdo->prepare($sql);
@@ -585,17 +581,6 @@ function buscar_fornecedor_por_id($pdo, $id_fornecedor)
     $stmt->execute();
 
     return $stmt->fetch();
-}
-
-function badge_tipo_fornecedor($tipo)
-{
-    return match ($tipo) {
-        'Fabricante' => 'success',
-        'Distribuidor / Fornecedor Comercial' => 'info text-dark',
-        'Empresa de Assistência Técnica' => 'warning text-dark',
-        'Fornecedor de Consumíveis/Acessórios' => 'secondary',
-        default => 'primary'
-    };
 }
 
 function calcular_estatisticas_fornecedores($fornecedores)
@@ -622,27 +607,6 @@ function calcular_estatisticas_fornecedores($fornecedores)
     }
 
     return $estatisticas;
-}
-
-
-// =====================================================
-// FORNECEDORES — INATIVAR / SOFT DELETE
-// =====================================================
-
-function inativar_fornecedor($pdo, $id_fornecedor)
-{
-    if (!validar_id($id_fornecedor)) {
-        return false;
-    }
-
-    $sql = "UPDATE fornecedores
-            SET estado = 'Inativo'
-            WHERE id_fornecedor = :id_fornecedor";
-
-    $stmt = $pdo->prepare($sql);
-    $stmt->bindValue(':id_fornecedor', $id_fornecedor, PDO::PARAM_INT);
-
-    return $stmt->execute();
 }
 
 
@@ -690,21 +654,25 @@ function criar_fornecedor($pdo, $dados)
             )";
 
     $stmt = $pdo->prepare($sql);
+
     $stmt->bindValue(':nome_empresa', $dados['nome_empresa']);
     $stmt->bindValue(':nif', $dados['nif']);
     $stmt->bindValue(':estado', $dados['estado']);
     $stmt->bindValue(':tipo_fornecedor', $dados['tipo_fornecedor']);
     $stmt->bindValue(':area_atuacao', $dados['area_atuacao']);
     $stmt->bindValue(':email', $dados['email']);
+
     bind_valor_ou_null($stmt, ':telefone', $dados['telefone']);
     bind_valor_ou_null($stmt, ':website', $dados['website']);
     bind_valor_ou_null($stmt, ':pessoa_contacto', $dados['pessoa_contacto']);
     bind_valor_ou_null($stmt, ':tel_pessoa', $dados['tel_pessoa']);
     bind_valor_ou_null($stmt, ':morada', $dados['morada']);
+
     $stmt->bindValue(':contrato_ativo', $dados['contrato_ativo']);
     bind_valor_ou_null($stmt, ':relacao_hospital', $dados['relacao_hospital']);
     $stmt->bindValue(':prioridade_contacto', $dados['prioridade_contacto']);
     bind_valor_ou_null($stmt, ':observacoes', $dados['observacoes']);
+
     $stmt->execute();
 
     return $pdo->lastInsertId();
@@ -717,6 +685,10 @@ function criar_fornecedor($pdo, $dados)
 
 function atualizar_fornecedor($pdo, $id_fornecedor, $dados)
 {
+    if (!validar_id($id_fornecedor)) {
+        return false;
+    }
+
     $sql = "UPDATE fornecedores
             SET nome_empresa = :nome_empresa,
                 nif = :nif,
@@ -736,22 +708,88 @@ function atualizar_fornecedor($pdo, $id_fornecedor, $dados)
             WHERE id_fornecedor = :id_fornecedor";
 
     $stmt = $pdo->prepare($sql);
+
     $stmt->bindValue(':nome_empresa', $dados['nome_empresa']);
     $stmt->bindValue(':nif', $dados['nif']);
     $stmt->bindValue(':estado', $dados['estado']);
     $stmt->bindValue(':tipo_fornecedor', $dados['tipo_fornecedor']);
     $stmt->bindValue(':area_atuacao', $dados['area_atuacao']);
     $stmt->bindValue(':email', $dados['email']);
+
     bind_valor_ou_null($stmt, ':telefone', $dados['telefone']);
-     bind_valor_ou_null($stmt, ':website', $dados['website']);
-      bind_valor_ou_null($stmt, ':pessoa_contacto', $dados['pessoa_contacto']);
-       bind_valor_ou_null($stmt, ':tel_pessoa', $dados['tel_pessoa']);
-        bind_valor_ou_null($stmt, ':morada', $dados['morada']);
+    bind_valor_ou_null($stmt, ':website', $dados['website']);
+    bind_valor_ou_null($stmt, ':pessoa_contacto', $dados['pessoa_contacto']);
+    bind_valor_ou_null($stmt, ':tel_pessoa', $dados['tel_pessoa']);
+    bind_valor_ou_null($stmt, ':morada', $dados['morada']);
+
     $stmt->bindValue(':contrato_ativo', $dados['contrato_ativo']);
     bind_valor_ou_null($stmt, ':relacao_hospital', $dados['relacao_hospital']);
     $stmt->bindValue(':prioridade_contacto', $dados['prioridade_contacto']);
     bind_valor_ou_null($stmt, ':observacoes', $dados['observacoes']);
+
     $stmt->bindValue(':id_fornecedor', $id_fornecedor, PDO::PARAM_INT);
+
+    return $stmt->execute();
+}
+
+
+// =====================================================
+// FORNECEDORES — INATIVAR / SOFT DELETE
+// =====================================================
+
+function inativar_fornecedor($pdo, $id_fornecedor)
+{
+    if (!validar_id($id_fornecedor)) {
+        return false;
+    }
+
+    $sql = "UPDATE fornecedores
+            SET estado = 'Inativo'
+            WHERE id_fornecedor = :id_fornecedor";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindValue(':id_fornecedor', $id_fornecedor, PDO::PARAM_INT);
+
+    return $stmt->execute();
+}
+
+
+// =====================================================
+// FORNECEDORES — ASSOCIAÇÃO A EQUIPAMENTOS
+// =====================================================
+
+function listar_equipamentos_para_associar_fornecedor($pdo)
+{
+    $sql = "SELECT 
+                id_equipamento,
+                codigo_inventario,
+                designacao,
+                marca,
+                modelo,
+                estado,
+                id_fornecedor_principal
+            FROM equipamentos
+            WHERE estado <> 'Abatido'
+            ORDER BY designacao ASC";
+
+    $stmt = $pdo->query($sql);
+
+    return $stmt->fetchAll();
+}
+
+function associar_fornecedor_equipamento($pdo, $id_fornecedor, $id_equipamento)
+{
+    if (!validar_id($id_fornecedor) || !validar_id($id_equipamento)) {
+        return false;
+    }
+
+    $sql = "UPDATE equipamentos
+            SET id_fornecedor_principal = :id_fornecedor
+            WHERE id_equipamento = :id_equipamento";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindValue(':id_fornecedor', $id_fornecedor, PDO::PARAM_INT);
+    $stmt->bindValue(':id_equipamento', $id_equipamento, PDO::PARAM_INT);
 
     return $stmt->execute();
 }
@@ -760,7 +798,6 @@ function atualizar_fornecedor($pdo, $id_fornecedor, $dados)
 // =====================================================
 // FORNECEDORES — FORMULÁRIOS E VALIDAÇÃO
 // =====================================================
-
 
 function recolher_dados_fornecedor_post()
 {
@@ -784,8 +821,6 @@ function recolher_dados_fornecedor_post()
         'observacoes' => valor_ou_null($_POST['observacoes'] ?? '')
     ];
 }
-
-
 
 function validar_dados_fornecedor($dados)
 {
@@ -817,6 +852,63 @@ function validar_dados_fornecedor($dados)
     }
 
     if (!empty($dados['tel_pessoa']) && !preg_match('/^[0-9]{9}$/', $dados['tel_pessoa'])) {
+        return false;
+    }
+
+    $tipos_validos = [
+        'Fabricante',
+        'Distribuidor / Fornecedor Comercial',
+        'Empresa de Assistência Técnica',
+        'Fornecedor de Consumíveis/Acessórios'
+    ];
+
+    if (!in_array($dados['tipo_fornecedor'], $tipos_validos, true)) {
+        return false;
+    }
+
+    $areas_validas = [
+        'Diagnóstico e Imagiologia',
+        'Monitorização',
+        'Suporte de Vida',
+        'Laboratório',
+        'Consumíveis Hospitalares',
+        'Assistência Técnica',
+        'Outro'
+    ];
+
+    if (!in_array($dados['area_atuacao'], $areas_validas, true)) {
+        return false;
+    }
+
+    $estados_validos = ['Ativo', 'Inativo'];
+
+    if (!in_array($dados['estado'], $estados_validos, true)) {
+        return false;
+    }
+
+    $contrato_validos = ['Sim', 'Não'];
+
+    if (!in_array($dados['contrato_ativo'], $contrato_validos, true)) {
+        return false;
+    }
+
+    $prioridades_validas = ['Normal', 'Alta', 'Urgente'];
+
+    if (!in_array($dados['prioridade_contacto'], $prioridades_validas, true)) {
+        return false;
+    }
+
+    $relacoes_validas = [
+        null,
+        '',
+        'Fornecedor principal',
+        'Fornecedor secundário',
+        'Prestador de assistência técnica',
+        'Fornecedor de consumíveis',
+        'Fabricante sem contrato direto'
+    ];
+
+    if (!in_array($dados['relacao_hospital'], $relacoes_validas, true)) {
         return false;
     }
 

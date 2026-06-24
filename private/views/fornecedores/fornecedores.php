@@ -4,7 +4,6 @@
 require_once __DIR__ . '/../../includes/funcoes.php';
 require_once __DIR__ . '/../../includes/database.php';
 
-
 redirect_if_not_logged();
 $fornecedores = listar_fornecedores($pdo);
 $estatisticas = calcular_estatisticas_fornecedores($fornecedores);
@@ -13,7 +12,6 @@ $totalFornecedores = $estatisticas['total'];
 $totalFabricantes = $estatisticas['fabricantes'];
 $totalAssistencia = $estatisticas['assistencia'];
 $totalEquipamentosAssociados = $estatisticas['equipamentos_associados'];
-
 
 ?>
 <!DOCTYPE html>
@@ -26,7 +24,6 @@ $totalEquipamentosAssociados = $estatisticas['equipamentos_associados'];
     <link rel="stylesheet" href="../../../assets/css/1240881.css">
     <link rel="stylesheet" href="../../../assets/fontawesome/all.min.css">
     <link rel="shortcut icon" href="../../../assets/img/logo 125.png" type="image/png">
-
 
 </head>
 <body class="bg-light">
@@ -283,39 +280,48 @@ $totalEquipamentosAssociados = $estatisticas['equipamentos_associados'];
                     </span>
                 </td>
 
-                <td class="text-end">
-                    <?php if (!fornecedor_inativo($fornecedor)): ?>
-                        <a href="editar.php?id_fornecedor=<?= $fornecedor->id_fornecedor ?>" 
-                           class="btn btn-sm btn-outline-warning" 
-                           title="Editar">
-                            <i class="fa-solid fa-pen"></i>
-                        </a>
+               
+<td class="text-end">
 
-                        <a href="apagar.php?id_fornecedor=<?= $fornecedor->id_fornecedor ?>" 
-                           class="btn btn-sm btn-outline-danger" 
-                           title="Inativar">
-                            <i class="fa-solid fa-ban"></i>
-                        </a>
+    <a href="consultar.php?id_fornecedor=<?= $fornecedor->id_fornecedor ?>" 
+       class="btn btn-sm btn-outline-info" 
+       title="Consultar">
+        <i class="fa-solid fa-eye"></i>
+    </a>
 
-                        <a href="associar.php?id_fornecedor=<?= $fornecedor->id_fornecedor ?>" 
-                           class="btn btn-sm btn-outline-primary" 
-                           title="Associar Fornecedor">
-                            <i class="fa-solid fa-link"></i>
-                        </a>
-                    <?php else: ?>
-                        <button class="btn btn-sm btn-outline-secondary" disabled title="Fornecedor inativo">
-                            <i class="fa-solid fa-pen-slash"></i>
-                        </button>
+    <?php if (!fornecedor_inativo($fornecedor)): ?>
+        <a href="editar.php?id_fornecedor=<?= $fornecedor->id_fornecedor ?>" 
+           class="btn btn-sm btn-outline-warning" 
+           title="Editar">
+            <i class="fa-solid fa-pen"></i>
+        </a>
 
-                        <button class="btn btn-sm btn-outline-secondary" disabled title="Já se encontra inativo">
-                            <i class="fa-solid fa-ban"></i>
-                        </button>
+        <a href="apagar.php?id_fornecedor=<?= $fornecedor->id_fornecedor ?>" 
+           class="btn btn-sm btn-outline-danger" 
+           title="Inativar">
+            <i class="fa-solid fa-ban"></i>
+        </a>
 
-                        <button class="btn btn-sm btn-outline-secondary" disabled title="Fornecedor inativo">
-                            <i class="fa-solid fa-link-slash"></i>
-                        </button>
-                    <?php endif; ?>
-                </td>
+        <a href="associar.php?id_fornecedor=<?= $fornecedor->id_fornecedor ?>" 
+           class="btn btn-sm btn-outline-primary" 
+           title="Associar Fornecedor">
+            <i class="fa-solid fa-link"></i>
+        </a>
+    <?php else: ?>
+        <button class="btn btn-sm btn-outline-secondary" disabled title="Fornecedor inativo">
+            <i class="fa-solid fa-pen-slash"></i>
+        </button>
+
+        <button class="btn btn-sm btn-outline-secondary" disabled title="Já se encontra inativo">
+            <i class="fa-solid fa-ban"></i>
+        </button>
+
+        <button class="btn btn-sm btn-outline-secondary" disabled title="Fornecedor inativo">
+            <i class="fa-solid fa-link-slash"></i>
+        </button>
+    <?php endif; ?>
+
+</td>
             </tr>
         <?php endforeach; ?>
     <?php endif; ?>
