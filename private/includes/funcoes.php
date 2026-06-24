@@ -1689,3 +1689,551 @@ function validar_dados_garantia($dados)
 
     return true;
 }
+// =====================================================
+// DOCUMENTAÇÃO — BADGES / ESTADOS VISUAIS
+// =====================================================
+
+function badge_estado_documento($estado)
+{
+    return match ($estado) {
+        'Válido' => 'success',
+        'A Terminar' => 'warning text-dark',
+        'Expirado' => 'danger',
+        'Sem Validade' => 'secondary',
+        default => 'secondary'
+    };
+}
+
+function badge_tipo_documento($tipo_documento)
+{
+    return match ($tipo_documento) {
+        'Manual de Utilizador' => 'info text-dark',
+        'Manual de Serviço' => 'dark',
+        'Certificado' => 'primary',
+        'Contrato' => 'success',
+        'Fatura' => 'warning text-dark',
+        'Declaração de Conformidade' => 'success',
+        'Relatório Técnico' => 'secondary',
+        default => 'secondary'
+    };
+}
+
+function badge_associacao_documento($tipo_associacao)
+{
+    return match ($tipo_associacao) {
+        'Equipamento' => 'primary',
+        'Fornecedor' => 'success',
+        'Garantia' => 'warning text-dark',
+        'Contrato' => 'dark',
+        default => 'secondary'
+    };
+}
+
+function documento_expirado($documento)
+{
+    return ($documento->estado ?? '') === 'Expirado';
+}
+
+
+// =====================================================
+// DOCUMENTAÇÃO — LISTAGEM E CONSULTA
+// =====================================================
+
+function listar_documentos($pdo)
+{
+    $sql = "SELECT *
+            FROM documentos
+            ORDER BY id_documento DESC";
+
+    $stmt = $pdo->query($sql);
+
+    return $stmt->fetchAll();
+}
+
+function buscar_documento_por_id($pdo, $id_documento)
+{
+    if (!validar_id($id_documento)) {
+        return false;
+    }
+
+    $sql = "SELECT *
+            FROM documentos
+            WHERE id_documento = :id_documento
+            LIMIT 1";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindValue(':id_documento', $id_documento, PDO::PARAM_INT);
+    $stmt->execute();
+
+    return $stmt->fetch();
+}
+
+function calcular_estatisticas_documentos($documentos)
+{
+    $estatisticas = [
+        'total' => count($documentos),
+        'validos' => 0,
+        'a_terminar' => 0,
+        'expirados' => 0
+    ];
+
+    foreach ($documentos as $documento) {
+        $estado = $documento->estado ?? '';
+
+        if ($estado === 'Válido') {
+            $estatisticas['validos']++;
+        }
+
+        if ($estado === 'A Terminar') {
+            $estatisticas['a_terminar']++;
+        }
+
+        if ($estado === 'Expirado') {
+            $estatisticas['expirados']++;
+        }
+    }
+
+    return $estatisticas;
+}
+
+
+// =====================================================
+// DOCUMENTAÇÃO — DADOS PARA SELECTS
+// =====================================================
+
+function listar_equipamentos_para_documento($pdo)
+{
+    $sql = "SELECT 
+                id_equipamento,
+                codigo_inventario,
+                designacao,
+                marca,
+                modelo,
+                estado
+            FROM equipamentos
+            WHERE estado <> 'Abatido'
+            ORDER BY codigo_inventario ASC";
+
+    $stmt = $pdo->query($sql);
+
+    return $stmt->fetchAll();
+}
+
+function listar_fornecedores_para_documento($pdo)
+{
+    $sql = "SELECT 
+                id_fornecedor,
+                nome_empresa,
+                tipo_fornecedor,
+                estado
+            FROM fornecedores
+            WHERE estado = 'Ativo'
+            ORDER BY nome_empresa ASC";
+
+    $stmt = $pdo->query($sql);
+
+    return $stmt->fetchAll();
+}
+
+function listar_garantias_para_documento($pdo)
+{
+    $sql = "SELECT 
+                g.id_garantia,
+                g.numero_contrato,
+                g.tipo_contrato,
+                g.estado,
+                e.codigo_inventario,
+                e.designacao AS equipamento_designacao
+            FROM garantias_contratos g
+            INNER JOIN equipamentos e ON g.id_equipamento = e.id_equipamento
+            ORDER BY g.id_garantia DESC";
+
+    $stmt = $pdo->query($sql);
+
+    return $stmt->fetchAll();
+}
+
+
+// =====================================================
+// DOCUMENTAÇÃO — ASSOCIAÇÃO
+// =====================================================
+
+function obter_associacao_documento($pdo, $tipo_associacao, $id_entidade_associada)
+{
+    if (!validar_id($id_entidade_associada)) {
+        return false;
+    }
+
+    $associacao = [
+        'entidade_associada' => '',
+        'id_equipamento' => null,
+        'id_fornecedor' => null,
+        'id_garantia' => null
+    ];
+
+    if ($tipo_associacao === 'Equipamento') {
+        $sql = "SELECT id_equipamento, codigo_inventario, designacao
+                FROM equipamentos
+                WHERE id_equipamento = :id
+                LIMIT 1";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindValue(':id', $id_entidade_associada, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $equipamento = $stmt->fetch();
+
+        if (!$equipamento) {
+            return false;
+        }
+
+        $associacao['entidade_associada'] = $equipamento->codigo_inventario . ' | ' . $equipamento->designacao;
+        $associacao['id_equipamento'] = $equipamento->id_equipamento;
+
+        return $associacao;
+    }
+
+    if ($tipo_associacao === 'Fornecedor') {
+        $sql = "SELECT id_fornecedor, nome_empresa
+                FROM fornecedores
+                WHERE id_fornecedor = :id
+                LIMIT 1";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindValue(':id', $id_entidade_associada, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $fornecedor = $stmt->fetch();
+
+        if (!$fornecedor) {
+            return false;
+        }
+
+        $associacao['entidade_associada'] = $fornecedor->nome_empresa;
+        $associacao['id_fornecedor'] = $fornecedor->id_fornecedor;
+
+        return $associacao;
+    }
+
+    if ($tipo_associacao === 'Garantia' || $tipo_associacao === 'Contrato') {
+        $sql = "SELECT 
+                    g.id_garantia,
+                    g.numero_contrato,
+                    g.tipo_contrato,
+                    e.codigo_inventario,
+                    e.designacao AS equipamento_designacao
+                FROM garantias_contratos g
+                INNER JOIN equipamentos e ON g.id_equipamento = e.id_equipamento
+                WHERE g.id_garantia = :id
+                LIMIT 1";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindValue(':id', $id_entidade_associada, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $garantia = $stmt->fetch();
+
+        if (!$garantia) {
+            return false;
+        }
+
+        $numero = !empty($garantia->numero_contrato) ? $garantia->numero_contrato : 'ID ' . $garantia->id_garantia;
+
+        $associacao['entidade_associada'] = $garantia->tipo_contrato . ' ' . $numero . ' | ' . $garantia->codigo_inventario . ' | ' . $garantia->equipamento_designacao;
+        $associacao['id_garantia'] = $garantia->id_garantia;
+
+        return $associacao;
+    }
+
+    return false;
+}
+
+function preparar_dados_documento_para_bd($pdo, $dados)
+{
+    $associacao = obter_associacao_documento(
+        $pdo,
+        $dados['tipo_associacao'],
+        $dados['id_entidade_associada']
+    );
+
+    if (!$associacao) {
+        return false;
+    }
+
+    $dados['entidade_associada'] = $associacao['entidade_associada'];
+    $dados['id_equipamento'] = $associacao['id_equipamento'];
+    $dados['id_fornecedor'] = $associacao['id_fornecedor'];
+    $dados['id_garantia'] = $associacao['id_garantia'];
+
+    return $dados;
+}
+
+
+// =====================================================
+// DOCUMENTAÇÃO — CRIAÇÃO
+// =====================================================
+
+function criar_documento($pdo, $dados)
+{
+    $dados = preparar_dados_documento_para_bd($pdo, $dados);
+
+    if (!$dados) {
+        return false;
+    }
+
+    $sql = "INSERT INTO documentos
+            (
+                nome_documento,
+                tipo_documento,
+                estado,
+                data_emissao,
+                data_validade,
+                tipo_associacao,
+                entidade_associada,
+                id_equipamento,
+                id_fornecedor,
+                id_garantia,
+                ficheiro,
+                caminho_ficheiro,
+                referencia,
+                tamanho_bytes,
+                mime_type,
+                observacoes
+            )
+            VALUES
+            (
+                :nome_documento,
+                :tipo_documento,
+                :estado,
+                :data_emissao,
+                :data_validade,
+                :tipo_associacao,
+                :entidade_associada,
+                :id_equipamento,
+                :id_fornecedor,
+                :id_garantia,
+                :ficheiro,
+                :caminho_ficheiro,
+                :referencia,
+                :tamanho_bytes,
+                :mime_type,
+                :observacoes
+            )";
+
+    $stmt = $pdo->prepare($sql);
+
+    $stmt->bindValue(':nome_documento', $dados['nome_documento']);
+    $stmt->bindValue(':tipo_documento', $dados['tipo_documento']);
+    $stmt->bindValue(':estado', $dados['estado']);
+
+    bind_valor_ou_null($stmt, ':data_emissao', $dados['data_emissao']);
+    bind_valor_ou_null($stmt, ':data_validade', $dados['data_validade']);
+
+    $stmt->bindValue(':tipo_associacao', $dados['tipo_associacao']);
+    $stmt->bindValue(':entidade_associada', $dados['entidade_associada']);
+
+    bind_valor_ou_null($stmt, ':id_equipamento', $dados['id_equipamento']);
+    bind_valor_ou_null($stmt, ':id_fornecedor', $dados['id_fornecedor']);
+    bind_valor_ou_null($stmt, ':id_garantia', $dados['id_garantia']);
+
+    $stmt->bindValue(':ficheiro', $dados['ficheiro']);
+    $stmt->bindValue(':caminho_ficheiro', $dados['caminho_ficheiro']);
+
+    bind_valor_ou_null($stmt, ':referencia', $dados['referencia']);
+    bind_valor_ou_null($stmt, ':tamanho_bytes', $dados['tamanho_bytes']);
+    bind_valor_ou_null($stmt, ':mime_type', $dados['mime_type']);
+    bind_valor_ou_null($stmt, ':observacoes', $dados['observacoes']);
+
+    $stmt->execute();
+
+    return $pdo->lastInsertId();
+}
+
+
+// =====================================================
+// DOCUMENTAÇÃO — ATUALIZAÇÃO
+// =====================================================
+
+function atualizar_documento($pdo, $id_documento, $dados)
+{
+    if (!validar_id($id_documento)) {
+        return false;
+    }
+
+    $dados = preparar_dados_documento_para_bd($pdo, $dados);
+
+    if (!$dados) {
+        return false;
+    }
+
+    $sql = "UPDATE documentos
+            SET nome_documento = :nome_documento,
+                tipo_documento = :tipo_documento,
+                estado = :estado,
+                data_emissao = :data_emissao,
+                data_validade = :data_validade,
+                tipo_associacao = :tipo_associacao,
+                entidade_associada = :entidade_associada,
+                id_equipamento = :id_equipamento,
+                id_fornecedor = :id_fornecedor,
+                id_garantia = :id_garantia,
+                ficheiro = :ficheiro,
+                caminho_ficheiro = :caminho_ficheiro,
+                referencia = :referencia,
+                tamanho_bytes = :tamanho_bytes,
+                mime_type = :mime_type,
+                observacoes = :observacoes
+            WHERE id_documento = :id_documento";
+
+    $stmt = $pdo->prepare($sql);
+
+    $stmt->bindValue(':nome_documento', $dados['nome_documento']);
+    $stmt->bindValue(':tipo_documento', $dados['tipo_documento']);
+    $stmt->bindValue(':estado', $dados['estado']);
+
+    bind_valor_ou_null($stmt, ':data_emissao', $dados['data_emissao']);
+    bind_valor_ou_null($stmt, ':data_validade', $dados['data_validade']);
+
+    $stmt->bindValue(':tipo_associacao', $dados['tipo_associacao']);
+    $stmt->bindValue(':entidade_associada', $dados['entidade_associada']);
+
+    bind_valor_ou_null($stmt, ':id_equipamento', $dados['id_equipamento']);
+    bind_valor_ou_null($stmt, ':id_fornecedor', $dados['id_fornecedor']);
+    bind_valor_ou_null($stmt, ':id_garantia', $dados['id_garantia']);
+
+    $stmt->bindValue(':ficheiro', $dados['ficheiro']);
+    $stmt->bindValue(':caminho_ficheiro', $dados['caminho_ficheiro']);
+
+    bind_valor_ou_null($stmt, ':referencia', $dados['referencia']);
+    bind_valor_ou_null($stmt, ':tamanho_bytes', $dados['tamanho_bytes']);
+    bind_valor_ou_null($stmt, ':mime_type', $dados['mime_type']);
+    bind_valor_ou_null($stmt, ':observacoes', $dados['observacoes']);
+
+    $stmt->bindValue(':id_documento', $id_documento, PDO::PARAM_INT);
+
+    return $stmt->execute();
+}
+
+
+// =====================================================
+// DOCUMENTAÇÃO — EXPIRAR / SOFT DELETE
+// =====================================================
+
+function expirar_documento($pdo, $id_documento)
+{
+    if (!validar_id($id_documento)) {
+        return false;
+    }
+
+    $sql = "UPDATE documentos
+            SET estado = 'Expirado'
+            WHERE id_documento = :id_documento";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindValue(':id_documento', $id_documento, PDO::PARAM_INT);
+
+    return $stmt->execute();
+}
+
+
+// =====================================================
+// DOCUMENTAÇÃO — FORMULÁRIOS E VALIDAÇÃO
+// =====================================================
+
+function recolher_dados_documento_post()
+{
+    return [
+        'nome_documento' => limpar_texto($_POST['nome_documento'] ?? ''),
+        'tipo_documento' => limpar_texto($_POST['tipo_documento'] ?? ''),
+        'estado' => limpar_texto($_POST['estado'] ?? 'Válido'),
+
+        'data_emissao' => valor_ou_null($_POST['data_emissao'] ?? ''),
+        'data_validade' => valor_ou_null($_POST['data_validade'] ?? ''),
+
+        'tipo_associacao' => limpar_texto($_POST['tipo_associacao'] ?? ''),
+        'id_entidade_associada' => $_POST['id_entidade_associada'] ?? '',
+
+        'ficheiro' => limpar_texto($_POST['ficheiro'] ?? ''),
+        'caminho_ficheiro' => limpar_texto($_POST['caminho_ficheiro'] ?? ''),
+
+        'referencia' => valor_ou_null($_POST['referencia'] ?? ''),
+        'tamanho_bytes' => valor_ou_null($_POST['tamanho_bytes'] ?? ''),
+        'mime_type' => valor_ou_null($_POST['mime_type'] ?? ''),
+        'observacoes' => valor_ou_null($_POST['observacoes'] ?? '')
+    ];
+}
+
+function validar_dados_documento($dados)
+{
+    $campos_obrigatorios = [
+        'nome_documento',
+        'tipo_documento',
+        'estado',
+        'tipo_associacao',
+        'id_entidade_associada',
+        'ficheiro',
+        'caminho_ficheiro'
+    ];
+
+    foreach ($campos_obrigatorios as $campo) {
+        if (!isset($dados[$campo]) || $dados[$campo] === '') {
+            return false;
+        }
+    }
+
+    if (strlen($dados['nome_documento']) < 3) {
+        return false;
+    }
+
+    if (!validar_id($dados['id_entidade_associada'])) {
+        return false;
+    }
+
+    $tipos_validos = [
+        'Manual de Utilizador',
+        'Manual de Serviço',
+        'Certificado',
+        'Contrato',
+        'Fatura',
+        'Declaração de Conformidade',
+        'Relatório Técnico'
+    ];
+
+    if (!in_array($dados['tipo_documento'], $tipos_validos, true)) {
+        return false;
+    }
+
+    $estados_validos = [
+        'Válido',
+        'A Terminar',
+        'Expirado',
+        'Sem Validade'
+    ];
+
+    if (!in_array($dados['estado'], $estados_validos, true)) {
+        return false;
+    }
+
+    $associacoes_validas = [
+        'Equipamento',
+        'Fornecedor',
+        'Garantia',
+        'Contrato'
+    ];
+
+    if (!in_array($dados['tipo_associacao'], $associacoes_validas, true)) {
+        return false;
+    }
+
+    if (!empty($dados['data_emissao']) && !empty($dados['data_validade'])) {
+        if (strtotime($dados['data_validade']) < strtotime($dados['data_emissao'])) {
+            return false;
+        }
+    }
+
+    if (!empty($dados['tamanho_bytes']) && (!is_numeric($dados['tamanho_bytes']) || (int) $dados['tamanho_bytes'] < 0)) {
+        return false;
+    }
+
+    return true;
+}
